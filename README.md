@@ -6,17 +6,20 @@ The CS2 Tactical Board is a collaborative web application that allows multiple u
 ## Project Structure
 ```
 tacticalMap
-├── public
+├── public                  # Public-facing files
 │   ├── css
-│   │   └── style.css        # Styles for the application
+│   │   └── style.css       # Styles for the application
 │   ├── js
-│   │   └── script.js        # Client-side JavaScript logic
-│   ├── index.html           # Main HTML structure
-├── server
-│   ├── app.js               # Entry point for the server-side application
-│   └── sockets.js           # Manages WebSocket connections for real-time updates
-├── package.json             # npm configuration file
-├── README.md                # Project documentation
+│   │   └── script.js       # Client-side JavaScript logic
+│   ├── maps                # Map assets for the application
+│   ├── index.html          # Main HTML structure
+├── server                  # Server-side logic
+│   ├── app.js              # Entry point for the server-side application
+│   ├── sockets.js          # Manages WebSocket connections for real-time updates
+│   ├── userManager.js      # Handles user management and color assignments
+├── index.html              # Main entry point for the application
+├── package.json            # npm configuration file
+├── README.md               # Project documentation
 ```
 
 ## Features
@@ -24,6 +27,7 @@ tacticalMap
 - **Drawing Tools**: Use different tools to draw, ping, and interact with the map.
 - **Real-Time Collaboration**: See the actions of other users in real-time, including dropped objects and drawings.
 - **Color Picker**: Select colors for drawing and marking on the map.
+- **User Management**: Assign unique colors to users and manage their interactions.
 
 ## Setup Instructions
 1. Clone the repository:
