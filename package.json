@@ -1,0 +1,15 @@
+{
+  "name": "tactical-map",
+  "version": "1.0.0",
+  "description": "A collaborative tactical board for real-time drawing and interaction.",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "socket.io": "^4.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
