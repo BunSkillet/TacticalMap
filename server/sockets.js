@@ -32,18 +32,18 @@ io.on('connection', (socket) => {
 
     // Handle object drop event
     socket.on('dropObject', (data) => {
-        socket.broadcast.emit('objectDropped', data);
+        io.emit('objectDropped', data); // Broadcast to all clients
     });
 
     // Handle drawing event
     socket.on('draw', (data) => {
         console.log('Draw event received:', data);
-        io.emit('draw', data);
+        io.emit('draw', data); // Broadcast to all clients
     });
 
     // Handle ping event
     socket.on('ping', (data) => {
-        socket.broadcast.emit('pingReceived', data);
+        io.emit('pingReceived', data); // Broadcast to all clients
     });
 
     // Handle user disconnect

@@ -27,19 +27,19 @@ io.on('connection', (socket) => {
     // Handle drawing events
     socket.on('draw', (data) => {
         state.drawings.push(data);
-        io.emit('draw', data);
+        io.emit('draw', data); // Broadcast to all clients
     });
 
     // Handle ping events
     socket.on('ping', (data) => {
         state.pings.push(data);
-        io.emit('ping', data);
+        io.emit('ping', data); // Broadcast to all clients
     });
 
     // Handle object placement events
     socket.on('placeObject', (data) => {
         state.objects.push(data);
-        io.emit('placeObject', data);
+        io.emit('placeObject', data); // Broadcast to all clients
     });
 
     // Handle map change events
@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
         state.drawings = [];
         state.pings = [];
         state.objects = [];
-        io.emit('mapChanged', mapName);
+        io.emit('mapChanged', mapName); // Broadcast to all clients
     });
 
     // Handle disconnection

@@ -620,14 +620,38 @@ animate(); // starts the continuous redraw loop
 
 // Listen for 'draw' events from the server
 socket.on('draw', (data) => {
-    // Use the data to update the canvas
-    const ctx = document.getElementById('mapCanvas').getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(data.startX, data.startY);
-    ctx.lineTo(data.endX, data.endY);
-    ctx.strokeStyle = data.color;
-    ctx.lineWidth = data.lineWidth;
-    ctx.stroke();
+    penPaths.push(data);
+    draw();
+});
+
+// Listen for 'ping' events from the server
+socket.on('ping', (data) => {
+    pings.push(data);
+    draw();
+});
+
+// Listen for 'placeObject' events from the server
+socket.on('placeObject', (data) => {
+    placedObjects.push(data);
+    draw();
+});
+
+// Listen for 'mapChanged' events from the server
+socket.on('mapChanged', (mapName) => {
+    placedObjects = [];
+    penPaths = [];
+    pings = [];
+    loadMap(mapName);
+    draw();
+});
+
+// Listen for 'stateUpdate' events from the server
+socket.on('stateUpdate', (state) => {
+    penPaths = state.drawings;
+    pings = state.pings;
+    placedObjects = state.objects;
+    loadMap(state.currentMap);
+    draw();
 });
 
 // Emit map change events to the server
