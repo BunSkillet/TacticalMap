@@ -17,7 +17,7 @@ const state = {
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Handle WebSocket connections
+// Ensure the server maintains a global state and broadcasts updates to all clients
 io.on('connection', (socket) => {
     console.log('A user connected');
 

@@ -48,6 +48,56 @@ tacticalMap
    ```
 5. Open your browser and navigate to `http://localhost:3000` to access the application.
 
+## PM2 Setup and Deployment
+
+To manage the server using `pm2`, follow these steps:
+
+### Installation
+1. Install `pm2` globally if not already installed:
+   ```
+   npm install -g pm2
+   ```
+
+### Starting the Server
+1. Use the provided `ecosystem.config.js` file to start the server:
+   ```
+   pm2 start ecosystem.config.js
+   ```
+
+2. To view the status of the application:
+   ```
+   pm2 status
+   ```
+
+3. To stop the application:
+   ```
+   pm2 stop ecosystem.config.js
+   ```
+
+4. To restart the application:
+   ```
+   pm2 restart ecosystem.config.js
+   ```
+
+5. To view logs:
+   ```
+   pm2 logs
+   ```
+
+### Additional PM2 Commands
+- Save the current process list:
+  ```
+  pm2 save
+  ```
+
+- Automatically resurrect processes on server reboot:
+  ```
+  pm2 startup
+  ```
+
+### Accessing the Application
+Once the server is running, open your browser and navigate to `http://localhost:3000` to access the application.
+
 ## Usage
 - Select a map from the dropdown menu.
 - Use the tools provided to draw or drop objects on the map.
