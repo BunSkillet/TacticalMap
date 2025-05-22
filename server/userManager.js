@@ -43,8 +43,18 @@ function changeUserColor(socketId, newColor) {
     return { success: false, reason: 'Color unavailable' };
 }
 
+function getUser(socketId) {
+    return users.find(u => u.id === socketId) || null;
+}
+
+function getAllUsers() {
+    return users;
+}
+
 module.exports = {
     addUser,
     removeUser,
     changeUserColor,
+    getUser,
+    getAllUsers,
 };

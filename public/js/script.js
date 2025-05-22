@@ -347,7 +347,7 @@ canvas.addEventListener('mouseup', (e) => {
                 color: currentColor,
                 timestamp: Date.now(),
             };
-            socket.emit('draw', data);
+            socket.emit('draw', data); // Emit the drawing event to the server
         }
         penPath = [];
         draw();
@@ -620,8 +620,8 @@ animate(); // starts the continuous redraw loop
 
 // Listen for 'draw' events from the server
 socket.on('draw', (data) => {
-    penPaths.push(data);
-    draw();
+    penPaths.push(data); // Add the received drawing data to the penPaths array
+    draw(); // Redraw the canvas to include the new drawing
 });
 
 // Listen for 'ping' events from the server

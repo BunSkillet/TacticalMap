@@ -4,11 +4,15 @@
   "description": "A collaborative tactical board for real-time drawing and interaction.",
   "main": "server/app.js",
   "scripts": {
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "dev": "nodemon server/app.js"
   },
   "dependencies": {
     "express": "^4.18.0",
     "socket.io": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.0"
   },
   "author": "Your Name",
   "license": "MIT"

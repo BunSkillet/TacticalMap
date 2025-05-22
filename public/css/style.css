@@ -131,3 +131,41 @@ button.tool-button.active {
 #custom-context-menu button:hover {
   background-color: #555;
 }
+
+/* Add styles for active users and collaborative elements */
+.active-user {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 5px;
+  border: 2px solid #fff;
+}
+
+#user-list {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #222;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+#user-list h4 {
+  margin-bottom: 10px;
+}
+
+#user-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+#user-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+#user-list li span {
+  margin-left: 5px;
+}
