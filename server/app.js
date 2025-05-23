@@ -17,9 +17,9 @@ const state = {
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Ensure the server maintains a global state and broadcasts updates to all clients
+// Handle WebSocket connections
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log('A user connected:', socket.id);
 
     // Send the current state to the new client
     socket.emit('stateUpdate', state);
@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
 
     // Handle disconnection
     socket.on('disconnect', () => {
-        console.log('A user disconnected');
+        console.log('A user disconnected:', socket.id);
     });
 });
 

@@ -51,16 +51,6 @@ io.on('connection', (socket) => {
         io.emit('mapChanged', mapName); // Broadcast to all clients
     });
 
-    // Handle state update request
-    socket.on('requestState', () => {
-        socket.emit('stateUpdate', {
-            drawings: state.drawings,
-            pings: state.pings,
-            objects: state.objects,
-            currentMap: state.currentMap,
-        });
-    });
-
     // Handle user disconnect
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);

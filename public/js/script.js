@@ -342,12 +342,9 @@ canvas.addEventListener('mouseup', (e) => {
         isDrawing = false;
         isLiveDrawing = false;
         if (penPath.length > 1 && currentColor) {
-            const data = {
-                path: penPath,
-                color: currentColor,
-                timestamp: Date.now(),
-            };
-            socket.emit('draw', data); // Emit the drawing event to the server
+            const data = { path: penPath, color: currentColor, timestamp: Date.now() };
+            socket.emit('draw', data); // Emit to the server
+            penPaths.push(data); // Update local state
         }
         penPath = [];
         draw();
@@ -376,7 +373,9 @@ canvas.addEventListener('dblclick', (e) => {
     const data = {
         x, y, start: Date.now(), ripples: 5, color: currentColor || '#ff0000',
     };
-    socket.emit('ping', data);
+    socket.emit('ping', data); // Emit to the server
+    pings.push(data); // Update local state
+    draw();
 });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -593,7 +592,9 @@ canvas.addEventListener('drop', (e) => {
     const x = (e.clientX - rect.left - offsetX) / scale;
     const y = (e.clientY - rect.top - offsetY) / scale;
     const data = { symbol, x, y };
-    socket.emit('placeObject', data);
+    socket.emit('placeObject', data); // Emit to the server
+    placedObjects.push(data); // Update local state
+    draw();
 });
 
 function animate() {
@@ -618,10 +619,21 @@ function animate() {
 }
 animate(); // starts the continuous redraw loop
 
+const socket = io();
+
+// Listen for 'stateUpdate' from the server and update the local state
+socket.on('stateUpdate', (state) => {
+    penPaths = state.drawings;
+    pings = state.pings;
+    placedObjects = state.objects;
+    loadMap(state.currentMap);
+    draw();
+});
+
 // Listen for 'draw' events from the server
 socket.on('draw', (data) => {
-    penPaths.push(data); // Add the received drawing data to the penPaths array
-    draw(); // Redraw the canvas to include the new drawing
+    penPaths.push(data);
+    draw();
 });
 
 // Listen for 'ping' events from the server
@@ -645,53 +657,49 @@ socket.on('mapChanged', (mapName) => {
     draw();
 });
 
-// Listen for 'stateUpdate' events from the server
-socket.on('stateUpdate', (state) => {
-    penPaths = state.drawings;
-    pings = state.pings;
-    placedObjects = state.objects;
-    loadMap(state.currentMap);
+// Emit drawing events to the server
+canvas.addEventListener('mouseup', (e) => {
+    if (isDrawing && currentTool === 'pen') {
+        isDrawing = false;
+        isLiveDrawing = false;
+        if (penPath.length > 1 && currentColor) {
+            const data = { path: penPath, color: currentColor, timestamp: Date.now() };
+            socket.emit('draw', data); // Emit to the server
+            penPaths.push(data); // Update local state
+        }
+        penPath = [];
+        draw();
+    }
+});
+
+// Emit ping events to the server
+canvas.addEventListener('dblclick', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left - offsetX) / scale;
+    const y = (e.clientY - rect.top - offsetY) / scale;
+    const data = {
+        x, y, start: Date.now(), ripples: 5, color: currentColor || '#ff0000',
+    };
+    socket.emit('ping', data); // Emit to the server
+    pings.push(data); // Update local state
+    draw();
+});
+
+// Emit object placement events to the server
+canvas.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const symbol = e.dataTransfer.getData('text/plain');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left - offsetX) / scale;
+    const y = (e.clientY - rect.top - offsetY) / scale;
+    const data = { symbol, x, y };
+    socket.emit('placeObject', data); // Emit to the server
+    placedObjects.push(data); // Update local state
     draw();
 });
 
 // Emit map change events to the server
 mapSelect.addEventListener('change', () => {
     const mapName = mapSelect.value;
-    socket.emit('changeMap', mapName);
-});
-
-// Listen for state updates from the server
-socket.on('stateUpdate', (state) => {
-    penPaths = state.drawings;
-    pings = state.pings;
-    placedObjects = state.objects;
-    loadMap(state.currentMap);
-    draw();
-});
-
-// Listen for drawing updates from the server
-socket.on('draw', (data) => {
-    penPaths.push(data);
-    draw();
-});
-
-// Listen for ping updates from the server
-socket.on('ping', (data) => {
-    pings.push(data);
-    draw();
-});
-
-// Listen for object placement updates from the server
-socket.on('placeObject', (data) => {
-    placedObjects.push(data);
-    draw();
-});
-
-// Listen for map change updates from the server
-socket.on('mapChanged', (mapName) => {
-    placedObjects = [];
-    penPaths = [];
-    pings = [];
-    loadMap(mapName);
-    draw();
+    socket.emit('changeMap', mapName); // Emit to the server
 });
