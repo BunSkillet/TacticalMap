@@ -2,14 +2,43 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const userManager = require('./userManager');
+const WebSocketServer = require('ws').Server;
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+const ws = new WebSocketServer({ port: 8080 });
 
-// Handle new connections
+let idUtilisateur = 0; // Counter for unique user IDs
+
+// Simplified WebSocket broadcast function
+ws.broadcast = function (data) {
+    this.clients.forEach(client => {
+        if (client.readyState === 1) { // Ensure the client is open
+            client.send(data);
+        }
+    });
+};
+
+ws.on('connection', (socket) => {
+    idUtilisateur++;
+    const data = { type: "id", val: idUtilisateur };
+    socket.send(JSON.stringify(data));
+
+    console.log('WebSocket connection of user:', idUtilisateur);
+
+    socket.on('message', (message) => {
+        ws.broadcast(message); // Broadcast received messages to all clients
+    });
+});
+
+// Handle new connections via socket.io
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    // Assign a unique ID to the connected user
+    const userId = ++idUtilisateur;
+    socket.emit('userId', userId);
 
     // Add user and assign default color (red)
     const user = userManager.addUser(socket.id);
@@ -30,25 +59,30 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle object drop event
-    socket.on('dropObject', (data) => {
-        io.emit('objectDropped', data); // Broadcast to all clients
-    });
-
     // Handle drawing event
     socket.on('draw', (data) => {
-        console.log('Draw event received:', data);
-        io.emit('draw', data); // Broadcast to all clients
+        const drawingData = { ...data, userId }; // Attach user ID
+        console.log('Draw event received:', drawingData);
+        io.emit('draw', drawingData); // Broadcast to all clients
+        ws.broadcast(JSON.stringify({ type: 'draw', data: drawingData })); // Broadcast via WebSocket
     });
 
     // Handle ping event
     socket.on('ping', (data) => {
         io.emit('pingReceived', data); // Broadcast to all clients
+        ws.broadcast(JSON.stringify({ type: 'ping', data })); // Broadcast via WebSocket
+    });
+
+    // Handle object drop event
+    socket.on('dropObject', (data) => {
+        io.emit('objectDropped', data); // Broadcast to all clients
+        ws.broadcast(JSON.stringify({ type: 'dropObject', data })); // Broadcast via WebSocket
     });
 
     // Handle map change events
     socket.on('changeMap', (mapName) => {
         io.emit('mapChanged', mapName); // Broadcast to all clients
+        ws.broadcast(JSON.stringify({ type: 'mapChanged', mapName })); // Broadcast via WebSocket
     });
 
     // Handle user disconnect

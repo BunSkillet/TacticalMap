@@ -17,17 +17,24 @@ const state = {
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
+let userIdCounter = 0; // Counter to assign unique IDs to users
+
 // Handle WebSocket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    // Assign a unique ID to the connected user
+    const userId = ++userIdCounter;
+    socket.emit('userId', userId);
 
     // Send the current state to the new client
     socket.emit('stateUpdate', state);
 
     // Handle drawing events
     socket.on('draw', (data) => {
-        state.drawings.push(data);
-        io.emit('draw', data); // Broadcast to all clients
+        const drawingData = { ...data, userId }; // Attach user ID to the drawing data
+        state.drawings.push(drawingData);
+        io.emit('draw', drawingData); // Broadcast to all clients
     });
 
     // Handle ping events

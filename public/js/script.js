@@ -657,14 +657,44 @@ socket.on('mapChanged', (mapName) => {
     draw();
 });
 
-// Emit drawing events to the server
+const ws = new WebSocket('ws://localhost:8080');
+
+ws.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+
+    switch (message.type) {
+        case 'draw':
+            penPaths.push(message.data);
+            draw();
+            break;
+        case 'ping':
+            pings.push(message.data);
+            draw();
+            break;
+        case 'dropObject':
+            placedObjects.push(message.data);
+            draw();
+            break;
+        case 'mapChanged':
+            placedObjects.length = 0;
+            penPaths.length = 0;
+            pings.length = 0;
+            loadMap(message.mapName);
+            draw();
+            break;
+        default:
+            console.warn('Unknown WebSocket message type:', message.type);
+    }
+};
+
+// Emit drawing events via WebSocket
 canvas.addEventListener('mouseup', (e) => {
     if (isDrawing && currentTool === 'pen') {
         isDrawing = false;
         isLiveDrawing = false;
         if (penPath.length > 1 && currentColor) {
             const data = { path: penPath, color: currentColor, timestamp: Date.now() };
-            socket.emit('draw', data); // Emit to the server
+            ws.send(JSON.stringify({ type: 'draw', data })); // Emit via WebSocket
             penPaths.push(data); // Update local state
         }
         penPath = [];
@@ -672,20 +702,18 @@ canvas.addEventListener('mouseup', (e) => {
     }
 });
 
-// Emit ping events to the server
+// Emit ping events via WebSocket
 canvas.addEventListener('dblclick', (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left - offsetX) / scale;
     const y = (e.clientY - rect.top - offsetY) / scale;
-    const data = {
-        x, y, start: Date.now(), ripples: 5, color: currentColor || '#ff0000',
-    };
-    socket.emit('ping', data); // Emit to the server
+    const data = { x, y, start: Date.now(), ripples: 5, color: currentColor || '#ff0000' };
+    ws.send(JSON.stringify({ type: 'ping', data })); // Emit via WebSocket
     pings.push(data); // Update local state
     draw();
 });
 
-// Emit object placement events to the server
+// Emit object placement events via WebSocket
 canvas.addEventListener('drop', (e) => {
     e.preventDefault();
     const symbol = e.dataTransfer.getData('text/plain');
@@ -693,13 +721,13 @@ canvas.addEventListener('drop', (e) => {
     const x = (e.clientX - rect.left - offsetX) / scale;
     const y = (e.clientY - rect.top - offsetY) / scale;
     const data = { symbol, x, y };
-    socket.emit('placeObject', data); // Emit to the server
+    ws.send(JSON.stringify({ type: 'dropObject', data })); // Emit via WebSocket
     placedObjects.push(data); // Update local state
     draw();
 });
 
-// Emit map change events to the server
+// Emit map change events via WebSocket
 mapSelect.addEventListener('change', () => {
     const mapName = mapSelect.value;
-    socket.emit('changeMap', mapName); // Emit to the server
+    ws.send(JSON.stringify({ type: 'mapChanged', mapName })); // Emit via WebSocket
 });
