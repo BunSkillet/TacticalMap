@@ -11,15 +11,14 @@ tacticalMap
 │   │   └── style.css       # Styles for the application
 │   ├── js
 │   │   └── script.js       # Client-side JavaScript logic
-│   ├── maps                # Map assets for the application
-│   ├── index.html          # Main HTML structure
+│   └── maps                # Map assets for the application
 ├── server                  # Server-side logic
 │   ├── app.js              # Entry point for the server-side
 │   ├── sockets.js          # Manages WebSocket connections for 
-│   ├── userManager.js      # Handles user management and color 
+│   └── userManager.js      # Handles user management and color 
 ├── index.html              # Main entry point for the application
 ├── package.json            # npm configuration file
-├── README.md               # Project documentation
+└── README.md               # Project documentation
 ```
 
 ## Features
@@ -36,7 +35,7 @@ tacticalMap
    ```
 2. Navigate to the project directory:
    ```
-   cd tacticalMap
+   cd TacticalMap
    ```
 3. Install the dependencies:
    ```
@@ -101,7 +100,6 @@ Once the server is running, open your browser and navigate to `http://localhost:
 ## Usage
 - Select a map from the dropdown menu.
 - Use the tools provided to draw or drop objects on the map.
-- Interact with other users' actions in real-time.
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
