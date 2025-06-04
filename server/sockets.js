@@ -30,9 +30,9 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle object drop event
-    socket.on('dropObject', (data) => {
-        io.emit('objectDropped', data); // Broadcast to all clients
+    // Handle object placement event
+    socket.on('placeObject', (data) => {
+        io.emit('placeObject', data); // Broadcast to all clients
     });
 
     // Handle drawing event
@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
 
     // Handle ping event
     socket.on('ping', (data) => {
-        io.emit('pingReceived', data); // Broadcast to all clients
+        io.emit('ping', data); // Broadcast to all clients
     });
 
     // Handle map change events
