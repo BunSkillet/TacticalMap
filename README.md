@@ -32,6 +32,7 @@ tacticalMap
 - **User Management**: Assign unique colors to users and manage their interactions.
 - **State Persistence**: Server state is saved to disk and old entries are automatically pruned.
 - **Request Validation**: Incoming drawing, ping, and object data is validated and rate limited to prevent abuse.
+- **Automated Tests**: Basic unit tests verify user management functions.
 
 ## Setup Instructions
 1. Clone the repository:
@@ -46,11 +47,15 @@ tacticalMap
    ```
    npm install
    ```
-4. Start the server:
+4. Run the tests:
+   ```
+   npm test
+   ```
+5. Start the server:
    ```
    npm start
    ```
-5. Open your browser and navigate to `http://localhost:3000` to access the application.
+6. Open your browser and navigate to `http://localhost:3000` to access the application.
 
 ## PM2 Setup and Deployment
 

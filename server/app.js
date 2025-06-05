@@ -126,6 +126,7 @@ function pushLimited(arr, item) {
     }
 }
 
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -180,7 +181,6 @@ io.on('connection', (socket) => {
     socket.on('ping', (data) => {
 
         if (!isValidPing(data) || rateLimited(socket.id, 'ping')) return;
-
         pushLimited(state.pings, data);
         io.emit('ping', data); // Broadcast to all clients
         saveState();
