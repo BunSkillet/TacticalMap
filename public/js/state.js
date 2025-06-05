@@ -19,7 +19,8 @@ export const state = {
   penPaths: [],
   isDrawing: false,
   isLiveDrawing: false,
-  pings: []
+  pings: [],
+  draggedSymbol: null
 };
 
 state.ctx = state.canvas.getContext('2d');
@@ -41,4 +42,5 @@ export function resetState() {
   state.isDrawing = false;
   state.isLiveDrawing = false;
   state.pings.length = 0;
+  state.draggedSymbol = null;
 }
