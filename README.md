@@ -10,12 +10,16 @@ tacticalMap
 │   ├── css
 │   │   └── style.css       # Styles for the application
 │   ├── js
-│   │   └── script.js       # Client-side JavaScript logic
+│   │   ├── main.js         # Client-side entry point
+│   │   ├── canvas.js       # Canvas rendering logic
+│   │   ├── events.js       # DOM event handlers
+│   │   ├── socketHandlers.js # Socket.io helpers
+│   │   └── state.js        # Application state management
 │   └── maps                # Map assets for the application
 ├── server                  # Server-side logic
 │   ├── app.js              # Entry point for the server-side
-│   ├── sockets.js          # Manages WebSocket connections for 
-│   └── userManager.js      # Handles user management and color 
+│   ├── sockets.js          # Manages WebSocket connections for real-time events
+│   └── userManager.js      # Handles user management and color assignments
 ├── index.html              # Main entry point for the application
 ├── package.json            # npm configuration file
 └── README.md               # Project documentation
@@ -35,7 +39,7 @@ tacticalMap
    ```
 2. Navigate to the project directory:
    ```
-   cd TacticalMap
+   cd tacticalMap
    ```
 3. Install the dependencies:
    ```

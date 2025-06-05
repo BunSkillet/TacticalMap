@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CS2 Tactical Board</title>
   <link rel="stylesheet" href="css/style.css"> <!-- Link to external CSS -->
 </head>
 <body>
-  <div id="main">
+  <div id="main" role="main">
     <div id="canvas-container">
-      <canvas id="mapCanvas"></canvas>
+      <canvas id="mapCanvas" aria-label="Tactical map" role="img"></canvas>
     </div>
     <div id="side-panel">
       <label for="map-select"><strong>Choose Map:</strong></label>
@@ -30,34 +31,34 @@
       <h3>Colours</h3>
       <div class="color-picker-container">
         <!-- Ensure colors match the JavaScript logic -->
-        <div class="color-swatch" style="background-color: #eda338" data-color="#eda338" title="Orange"></div>
-        <div class="color-swatch" style="background-color: #109856" data-color="#109856" title="Green"></div>
-        <div class="color-swatch" style="background-color: #68a3e5" data-color="#68a3e5" title="Blue"></div>
-        <div class="color-swatch" style="background-color: #e6f13d" data-color="#e6f13d" title="Yellow"></div>
-        <div class="color-swatch" style="background-color: #803ca1" data-color="#803ca1" title="Purple"></div>
-        <div class="color-swatch" style="background-color: #ff0000" data-color="#ff0000" title="Red"></div>
+        <div class="color-swatch" role="button" tabindex="0" aria-label="Select orange" style="background-color: #eda338" data-color="#eda338" title="Orange"></div>
+        <div class="color-swatch" role="button" tabindex="0" aria-label="Select green" style="background-color: #109856" data-color="#109856" title="Green"></div>
+        <div class="color-swatch" role="button" tabindex="0" aria-label="Select blue" style="background-color: #68a3e5" data-color="#68a3e5" title="Blue"></div>
+        <div class="color-swatch" role="button" tabindex="0" aria-label="Select yellow" style="background-color: #e6f13d" data-color="#e6f13d" title="Yellow"></div>
+        <div class="color-swatch" role="button" tabindex="0" aria-label="Select purple" style="background-color: #803ca1" data-color="#803ca1" title="Purple"></div>
+        <div class="color-swatch" role="button" tabindex="0" aria-label="Select red" style="background-color: #ff0000" data-color="#ff0000" title="Red"></div>
       </div>
       <h3>Tools</h3>
       <div class="draggable-container">
         <!-- Ensure tools match the JavaScript logic -->
-        <button class="tool-button" data-tool="select" title="Select Tool">🖱️</button>
-        <button class="tool-button" data-tool="pan" title="Pan Tool">🖐️</button>
-        <button class="tool-button" data-tool="pen" title="Pen Tool">✏️</button>
-        <button class="tool-button" data-tool="line" title="Line Tool">📏</button>
-        <button class="tool-button" data-tool="arrow" title="Arrow Tool">➡️</button>
-        <button class="tool-button" data-tool="text" title="Text Tool">🔤</button>
-        <button class="tool-button" data-tool="ping" title="Ping Tool">📍</button>
+        <button type="button" class="tool-button" data-tool="select" aria-label="Select tool" title="Select Tool">🖱️</button>
+        <button type="button" class="tool-button" data-tool="pan" aria-label="Pan tool" title="Pan Tool">🖐️</button>
+        <button type="button" class="tool-button" data-tool="pen" aria-label="Pen tool" title="Pen Tool">✏️</button>
+        <button type="button" class="tool-button" data-tool="line" aria-label="Line tool" title="Line Tool">📏</button>
+        <button type="button" class="tool-button" data-tool="arrow" aria-label="Arrow tool" title="Arrow Tool">➡️</button>
+        <button type="button" class="tool-button" data-tool="text" aria-label="Text tool" title="Text Tool">🔤</button>
+        <button type="button" class="tool-button" data-tool="ping" aria-label="Ping tool" title="Ping Tool">📍</button>
       </div>
       <h3>Draggable Objects</h3>
       <div class="draggable-container">
         <!-- Ensure draggable objects match the JavaScript logic -->
-        <div class="draggable-button" draggable="true" data-symbol="💥" title="Flash">💥</div>
-        <div class="draggable-button" draggable="true" data-symbol="💣" title="Bomb">💣</div>
-        <div class="draggable-button" draggable="true" data-symbol="🔥" title="Molotov">🔥</div>
-        <div class="draggable-button" draggable="true" data-symbol="💨" title="Smoke">💨</div>
-        <div class="draggable-button" draggable="true" data-symbol="🎯" title="Decoy">🎯</div>
-        <div class="draggable-button" draggable="true" data-symbol="CT" title="Counter-Terrorist">CT</div>
-        <div class="draggable-button" draggable="true" data-symbol="T" title="Terrorist">T</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Flash" data-symbol="💥" title="Flash">💥</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Bomb" data-symbol="💣" title="Bomb">💣</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Molotov" data-symbol="🔥" title="Molotov">🔥</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Smoke" data-symbol="💨" title="Smoke">💨</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Decoy" data-symbol="🎯" title="Decoy">🎯</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Counter-Terrorist" data-symbol="CT" title="Counter-Terrorist">CT</div>
+        <div class="draggable-button" draggable="true" tabindex="0" role="button" aria-label="Terrorist" data-symbol="T" title="Terrorist">T</div>
       </div>
     </div>
   </div>

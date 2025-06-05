@@ -129,9 +129,10 @@ function handleWheel(e) {
   const mouseY = (e.clientY - rect.top - state.offsetY) / state.scale;
   const delta = -e.deltaY * 0.001;
   const zoom = Math.exp(delta);
+  const oldScale = state.scale;
   state.scale *= zoom;
-  state.offsetX -= mouseX * (zoom - 1) * state.scale;
-  state.offsetY -= mouseY * (zoom - 1) * state.scale;
+  state.offsetX -= mouseX * (zoom - 1) * oldScale;
+  state.offsetY -= mouseY * (zoom - 1) * oldScale;
   draw();
 }
 
