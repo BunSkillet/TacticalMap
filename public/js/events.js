@@ -136,15 +136,16 @@ function handleWheel(e) {
   draw();
 }
 
-function handleDrop(e) {
-  e.preventDefault();
-  const symbol = e.dataTransfer.getData('text/plain');
+
+function placeDraggedObject(e) {
+  if (!state.draggedSymbol) return;
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
-  const data = { symbol, x, y };
+  const data = { symbol: state.draggedSymbol, x, y };
   state.placedObjects.push(data);
   socket.emit('placeObject', data);
+  state.draggedSymbol = null;
   draw();
 }
 
@@ -257,11 +258,12 @@ export function setupEvents() {
   });
 
   state.canvas.addEventListener('wheel', handleWheel);
-  state.canvas.addEventListener('pointerdown', handleMouseDown);
-  state.canvas.addEventListener('pointerup', handleMouseUp);
-  state.canvas.addEventListener('pointermove', handleMouseMove);
-  state.canvas.addEventListener('dragover', e => e.preventDefault());
-  state.canvas.addEventListener('drop', handleDrop);
+
+  state.canvas.addEventListener('mousedown', handleMouseDown);
+  state.canvas.addEventListener('mouseup', handleMouseUp);
+  state.canvas.addEventListener('mousemove', handleMouseMove);
+  state.canvas.addEventListener('pointerup', placeDraggedObject);
+
 
   state.resetViewButton.addEventListener('click', centerMap);
 
@@ -272,9 +274,13 @@ export function setupEvents() {
   });
 
   document.querySelectorAll('.draggable-button').forEach(button => {
-    button.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', button.dataset.symbol);
+    button.addEventListener('pointerdown', () => {
+      state.draggedSymbol = button.dataset.symbol;
     });
+  });
+
+  document.addEventListener('pointerup', () => {
+    state.draggedSymbol = null;
   });
 
   document.querySelectorAll('.tool-button').forEach(btn => {
