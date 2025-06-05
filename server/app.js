@@ -4,15 +4,136 @@ const https = require('https');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
-const helmet = require('helmet');
-const cors = require('cors');
-const userManager = require('./userManager');
 
 const RATE_LIMITS = {
     draw: 200, // ms between draw events
     ping: 1000, // ms between ping events
     placeObject: 200, // ms between object placements
 };
+
+const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
+
+const STATE_FILE = path.join(__dirname, 'state.json');
+const MAX_ITEMS = 1000;
+
+function loadState() {
+    if (fs.existsSync(STATE_FILE)) {
+        try {
+            const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+            return {
+                drawings: data.drawings || [],
+                pings: data.pings || [],
+                objects: data.objects || [],
+                currentMap: data.currentMap || 'train'
+            };
+        } catch (err) {
+            console.error('Failed to load state file:', err);
+        }
+    }
+    return {
+        drawings: [],
+        pings: [],
+        objects: [],
+        currentMap: 'train'
+    };
+}
+
+function saveState() {
+    try {
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state));
+    } catch (err) {
+        console.error('Failed to save state file:', err);
+    }
+}
+
+function pushLimited(arr, item) {
+    arr.push(item);
+    if (arr.length > MAX_ITEMS) {
+        arr.shift();
+    }
+}
+
+function isValidDraw(data) {
+    return data && Array.isArray(data.path) && data.path.length > 0 &&
+        data.path.every(pt => typeof pt.x === 'number' && typeof pt.y === 'number') &&
+        typeof data.color === 'string' && data.color.length < 20;
+}
+
+function isValidPing(data) {
+    return data && typeof data.x === 'number' && typeof data.y === 'number' &&
+        typeof data.start === 'number';
+}
+
+function isValidObject(data) {
+    return data && typeof data.symbol === 'string' && data.symbol.length <= 2 &&
+        typeof data.x === 'number' && typeof data.y === 'number';
+}
+
+function rateLimited(socketId, type) {
+    const now = Date.now();
+    if (!lastEvent.has(socketId)) {
+        lastEvent.set(socketId, {});
+    }
+    const entry = lastEvent.get(socketId);
+    const limit = RATE_LIMITS[type] || 0;
+    if (entry[type] && now - entry[type] < limit) {
+        return true;
+    }
+    entry[type] = now;
+    return false;
+}
+
+const fs = require('fs');
+const userManager = require('./userManager');
+
+const STATE_FILE = path.join(__dirname, 'state.json');
+const MAX_ITEMS = 1000;
+
+function loadState() {
+    if (fs.existsSync(STATE_FILE)) {
+        try {
+            const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+            return {
+                drawings: data.drawings || [],
+                pings: data.pings || [],
+                objects: data.objects || [],
+                currentMap: data.currentMap || 'train'
+            };
+        } catch (err) {
+            console.error('Failed to load state file:', err);
+        }
+    }
+    return {
+        drawings: [],
+        pings: [],
+        objects: [],
+        currentMap: 'train'
+    };
+}
+
+function saveState() {
+    try {
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state));
+    } catch (err) {
+        console.error('Failed to save state file:', err);
+    }
+}
+
+function pushLimited(arr, item) {
+    arr.push(item);
+    if (arr.length > MAX_ITEMS) {
+        arr.shift();
+    }
+}
+
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Load existing state from disk or start with defaults
+const state = loadState();
+saveState();
 
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
