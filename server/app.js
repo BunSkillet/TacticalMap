@@ -17,6 +17,11 @@ const state = {
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Serve the main HTML file from the project root
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html'));
+});
+
 // Handle WebSocket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
