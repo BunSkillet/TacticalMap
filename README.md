@@ -18,7 +18,6 @@ tacticalMap
 │   └── maps                # Map assets for the application
 ├── server                  # Server-side logic
 │   ├── app.js              # Entry point for the server-side
-│   ├── sockets.js          # Manages WebSocket connections for real-time events
 │   └── userManager.js      # Handles user management and color assignments
 ├── index.html              # Main entry point for the application
 ├── package.json            # npm configuration file
@@ -31,6 +30,9 @@ tacticalMap
 - **Real-Time Collaboration**: See the actions of other users in real-time, including dropped objects and drawings.
 - **Color Picker**: Select colors for drawing and marking on the map.
 - **User Management**: Assign unique colors to users and manage their interactions.
+- **State Persistence**: Server state is saved to disk and old entries are automatically pruned.
+- **Request Validation**: Incoming drawing, ping, and object data is validated and rate limited to prevent abuse.
+- **Automated Tests**: Basic unit tests verify user management functions.
 
 ## Setup Instructions
 1. Clone the repository:
@@ -45,11 +47,15 @@ tacticalMap
    ```
    npm install
    ```
-4. Start the server:
+4. Run the tests:
+   ```
+   npm test
+   ```
+5. Start the server:
    ```
    npm start
    ```
-5. Open your browser and navigate to `http://localhost:3000` to access the application.
+6. Open your browser and navigate to `http://localhost:3000` to access the application.
 
 ## PM2 Setup and Deployment
 
