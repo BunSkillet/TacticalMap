@@ -258,10 +258,12 @@ export function setupEvents() {
   });
 
   state.canvas.addEventListener('wheel', handleWheel);
+
   state.canvas.addEventListener('mousedown', handleMouseDown);
   state.canvas.addEventListener('mouseup', handleMouseUp);
   state.canvas.addEventListener('mousemove', handleMouseMove);
   state.canvas.addEventListener('pointerup', placeDraggedObject);
+
 
   state.resetViewButton.addEventListener('click', centerMap);
 
