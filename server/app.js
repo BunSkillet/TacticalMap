@@ -1,9 +1,9 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
-const userManager = require('./userManager');
 
 const RATE_LIMITS = {
     draw: 200, // ms between draw events
@@ -135,6 +135,109 @@ const io = socketIo(server);
 const state = loadState();
 saveState();
 
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
+const AUTH_TOKEN = process.env.AUTH_TOKEN;
+
+const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
+
+const STATE_FILE = path.join(__dirname, 'state.json');
+const MAX_ITEMS = 1000;
+
+function loadState() {
+    if (fs.existsSync(STATE_FILE)) {
+        try {
+            const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+            return {
+                drawings: data.drawings || [],
+                pings: data.pings || [],
+                objects: data.objects || [],
+                currentMap: data.currentMap || 'train'
+            };
+        } catch (err) {
+            console.error('Failed to load state file:', err);
+        }
+    }
+    return {
+        drawings: [],
+        pings: [],
+        objects: [],
+        currentMap: 'train'
+    };
+}
+
+function saveState() {
+    try {
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state));
+    } catch (err) {
+        console.error('Failed to save state file:', err);
+    }
+}
+
+function pushLimited(arr, item) {
+    arr.push(item);
+    if (arr.length > MAX_ITEMS) {
+        arr.shift();
+    }
+}
+
+function isValidDraw(data) {
+    return data && Array.isArray(data.path) && data.path.length > 0 &&
+        data.path.every(pt => typeof pt.x === 'number' && typeof pt.y === 'number') &&
+        typeof data.color === 'string' && data.color.length < 20;
+}
+
+function isValidPing(data) {
+    return data && typeof data.x === 'number' && typeof data.y === 'number' &&
+        typeof data.start === 'number';
+}
+
+function isValidObject(data) {
+    return data && typeof data.symbol === 'string' && data.symbol.length <= 2 &&
+        typeof data.x === 'number' && typeof data.y === 'number';
+}
+
+function rateLimited(socketId, type) {
+    const now = Date.now();
+    if (!lastEvent.has(socketId)) {
+        lastEvent.set(socketId, {});
+    }
+    const entry = lastEvent.get(socketId);
+    const limit = RATE_LIMITS[type] || 0;
+    if (entry[type] && now - entry[type] < limit) {
+        return true;
+    }
+    entry[type] = now;
+    return false;
+}
+
+const app = express();
+app.use(helmet());
+app.use(cors({ origin: ALLOWED_ORIGIN }));
+
+let server;
+if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
+    const options = {
+        key: fs.readFileSync(process.env.SSL_KEY_PATH),
+        cert: fs.readFileSync(process.env.SSL_CERT_PATH)
+    };
+    server = https.createServer(options, app);
+} else {
+    server = http.createServer(app);
+}
+
+const io = socketIo(server, { cors: { origin: ALLOWED_ORIGIN } });
+
+io.use((socket, next) => {
+    if (!AUTH_TOKEN) return next();
+    const token = socket.handshake.auth.token;
+    if (token === AUTH_TOKEN) return next();
+    return next(new Error('Unauthorized'));
+});
+
+// Load existing state from disk or start with defaults
+const state = loadState();
+saveState();
+
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -169,9 +272,7 @@ io.on('connection', (socket) => {
 
     // Handle drawing events
     socket.on('draw', (data) => {
-
         if (!isValidDraw(data) || rateLimited(socket.id, 'draw')) return;
-
         pushLimited(state.drawings, data);
         io.emit('draw', data); // Broadcast to all clients
         saveState();
@@ -179,7 +280,6 @@ io.on('connection', (socket) => {
 
     // Handle ping events
     socket.on('ping', (data) => {
-
         if (!isValidPing(data) || rateLimited(socket.id, 'ping')) return;
         pushLimited(state.pings, data);
         io.emit('ping', data); // Broadcast to all clients
@@ -188,9 +288,7 @@ io.on('connection', (socket) => {
 
     // Handle object placement events
     socket.on('placeObject', (data) => {
-
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
-
         pushLimited(state.objects, data);
         io.emit('placeObject', data); // Broadcast to all clients
         saveState();
