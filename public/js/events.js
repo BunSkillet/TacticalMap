@@ -257,9 +257,9 @@ export function setupEvents() {
   });
 
   state.canvas.addEventListener('wheel', handleWheel);
-  state.canvas.addEventListener('mousedown', handleMouseDown);
-  state.canvas.addEventListener('mouseup', handleMouseUp);
-  state.canvas.addEventListener('mousemove', handleMouseMove);
+  state.canvas.addEventListener('pointerdown', handleMouseDown);
+  state.canvas.addEventListener('pointerup', handleMouseUp);
+  state.canvas.addEventListener('pointermove', handleMouseMove);
   state.canvas.addEventListener('dragover', e => e.preventDefault());
   state.canvas.addEventListener('drop', handleDrop);
 

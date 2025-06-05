@@ -26,6 +26,7 @@ html, body {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: none;
 }
 #side-panel {
   width: 300px;
