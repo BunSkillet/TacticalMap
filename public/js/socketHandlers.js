@@ -1,7 +1,8 @@
 import { state } from './state.js';
 import { draw, loadMap } from './canvas.js';
 
-export const socket = io();
+const token = localStorage.getItem('authToken') || '';
+export const socket = io({ auth: { token } });
 
 export function initSocket() {
   socket.on('stateUpdate', (serverState) => {
