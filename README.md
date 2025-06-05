@@ -18,9 +18,9 @@ tacticalMap
 │   └── maps                # Map assets for the application
 ├── server                  # Server-side logic
 │   ├── app.js              # Entry point for the server-side
-│   ├── sockets.js          # Manages WebSocket connections for 
-│   └── userManager.js      # Handles user management and color 
-├── public/index.html       # Main entry point for the application
+│   ├── sockets.js          # Manages WebSocket connections for real-time events
+│   └── userManager.js      # Handles user management and color assignments
+├── index.html              # Main entry point for the application
 ├── package.json            # npm configuration file
 └── README.md               # Project documentation
 ```
