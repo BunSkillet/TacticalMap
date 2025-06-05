@@ -31,6 +31,8 @@ tacticalMap
 - **Real-Time Collaboration**: See the actions of other users in real-time, including dropped objects and drawings.
 - **Color Picker**: Select colors for drawing and marking on the map.
 - **User Management**: Assign unique colors to users and manage their interactions.
+- **State Persistence**: Server state is saved to disk and old entries are automatically pruned.
+- **Request Validation**: Incoming drawing, ping, and object data is validated and rate limited to prevent abuse.
 
 ## Setup Instructions
 1. Clone the repository:
