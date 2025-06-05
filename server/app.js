@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const userManager = require('./userManager');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +26,23 @@ app.get('/', (req, res) => {
 // Handle WebSocket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    // Add the user and assign a color
+    const user = userManager.addUser(socket.id);
+    socket.emit('colorAssigned', user.color);
+    socket.broadcast.emit('userConnected', socket.id);
+
+    // Handle color change requests
+    socket.on('changeColor', (newColor) => {
+        const result = userManager.changeUserColor(socket.id, newColor);
+
+        if (result.success) {
+            socket.emit('colorAssigned', result.color);
+            socket.broadcast.emit('colorChanged', { userId: socket.id, color: result.color });
+        } else {
+            socket.emit('colorUnavailable', newColor);
+        }
+    });
 
     // Send the current state to the new client
     socket.emit('stateUpdate', state);
@@ -59,6 +77,8 @@ io.on('connection', (socket) => {
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
+        userManager.removeUser(socket.id);
+        socket.broadcast.emit('userDisconnected', socket.id);
     });
 });
 
