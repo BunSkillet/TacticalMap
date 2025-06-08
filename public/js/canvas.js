@@ -18,7 +18,7 @@ export function centerMap() {
 }
 
 export function loadMap(name) {
-  state.mapImage.src = `../maps/${name}.jpg`;
+  state.mapImage.src = `/public/maps/${name}.jpg`;
 }
 
 export function draw() {
