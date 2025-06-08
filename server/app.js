@@ -8,15 +8,15 @@ const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
 const userManager = require('./userManager');
+const allowedOrigin = process.env.ALLOWED_ORIGIN;
+const AUTH_TOKEN = process.env.AUTH_TOKEN;
+
 
 const RATE_LIMITS = {
     draw: 200, // ms between draw events
     ping: 1000, // ms between ping events
     placeObject: 200, // ms between object placements
 };
-
-// const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
-// const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
