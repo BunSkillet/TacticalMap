@@ -8,7 +8,7 @@ const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
 const userManager = require('./userManager');
-const allowedOrigin = process.env.ALLOWED_ORIGIN;
+const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://http://140.238.196.102:3000/';
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 
