@@ -93,7 +93,7 @@ function rateLimited(socketId, type) {
 }
 
 const app = express();
-app.use(helmet());
+app.use(helmet({ hsts: false }));
 app.use(cors({ origin: allowedOrigin}));
 
 let server = http.createServer(app);
@@ -112,7 +112,7 @@ const state = loadState();
 saveState();
 
 // Serve static files from the public directory
-app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Serve the main HTML file from the project root
 app.get('/', (req, res) => {
