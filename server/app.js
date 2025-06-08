@@ -91,7 +91,7 @@ function rateLimited(socketId, type) {
 
 const app = express();
 app.use(helmet());
-app.use(cors({ origin: ALLOWED_ORIGIN }));
+app.use(cors({ origin: allowedOrigin}));
 
 let server;
 if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
@@ -104,7 +104,7 @@ if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
     server = http.createServer(app);
 }
 
-const io = socketIo(server, { cors: { origin: ALLOWED_ORIGIN } });
+const io = socketIo(server, { cors: { origin: allowedOrigin } });
 
 io.use((socket, next) => {
     if (!AUTH_TOKEN) return next();
