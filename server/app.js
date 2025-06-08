@@ -8,9 +8,8 @@ const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
 const userManager = require('./userManager');
-const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://http://140.238.196.102:3000/';
+const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://140.238.196.102:3000/';
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
-
 
 const RATE_LIMITS = {
     draw: 200, // ms between draw events
