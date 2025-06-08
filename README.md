@@ -63,7 +63,6 @@ The server recognizes several optional environment variables:
 
 - `ALLOWED_ORIGIN` – URL allowed to access the server (default: `http://localhost:3000`).
 - `AUTH_TOKEN` – If set, clients must provide this token when connecting via Socket.IO.
-- `SSL_KEY_PATH` and `SSL_CERT_PATH` – Paths to SSL key and certificate for HTTPS mode.
 
 To supply a token on the client, store it in `localStorage` under the key `authToken` before loading the page.
 
