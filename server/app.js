@@ -1,11 +1,12 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
+const https = require('https');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
+const selfsigned = require('selfsigned');
 const userManager = require('./userManager');
 const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://140.238.196.102:3000/';
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
@@ -100,7 +101,9 @@ if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
     };
     server = https.createServer(options, app);
 } else {
-    server = http.createServer(app);
+    const attrs = [{ name: 'commonName', value: 'localhost' }];
+    const pems = selfsigned.generate(attrs, { days: 365 });
+    server = https.createServer({ key: pems.private, cert: pems.cert }, app);
 }
 
 const io = socketIo(server, { cors: { origin: allowedOrigin } });
