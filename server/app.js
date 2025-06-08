@@ -14,12 +14,12 @@ const RATE_LIMITS = {
     placeObject: 200, // ms between object placements
 };
 
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
-const AUTH_TOKEN = process.env.AUTH_TOKEN;
+// const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
+// const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
-const STATE_FILE = path.join(__dirname, 'state.json');
+const STATE_FILE = path.join(__dirname, '../public/js/state.js');
 const MAX_ITEMS = 1000;
 
 function loadState() {
@@ -118,11 +118,11 @@ const state = loadState();
 saveState();
 
 // Serve static files from the public directory
-app.use(express.static(path.join(__dirname, '../public')));
+app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Serve the main HTML file from the project root
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../index.html'));
+    res.sendFile(path.join(__dirname, '../../index.html'));
 });
 
 // Handle WebSocket connections
