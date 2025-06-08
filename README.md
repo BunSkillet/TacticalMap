@@ -32,7 +32,7 @@ tacticalMap
 - **User Management**: Assign unique colors to users and manage their interactions.
 - **State Persistence**: Server state is saved to disk and old entries are automatically pruned.
 - **Request Validation**: Incoming drawing, ping, and object data is validated and rate limited to prevent abuse.
-- **Security Hardening**: Optional authentication token, HTTPS support, and configurable origin restrictions using environment variables.
+- **Security Hardening**: Optional authentication token, and configurable origin restrictions using environment variables.
 - **Automated Tests**: Basic unit tests verify user management functions.
 
 ## Setup Instructions
