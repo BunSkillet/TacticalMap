@@ -3,6 +3,7 @@ module.exports = {
     {
       name: "tactical-map-server",
       script: "server/app.js",
+      watch: false,
       env: {
         NODE_ENV: "development",
         PORT: 3000
