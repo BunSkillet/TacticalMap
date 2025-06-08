@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
-const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
@@ -99,7 +98,7 @@ if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
         key: fs.readFileSync(process.env.SSL_KEY_PATH),
         cert: fs.readFileSync(process.env.SSL_CERT_PATH)
     };
-    server = http.createServer(options, app);
+    server = https.createServer(options, app);
 } else {
     server = http.createServer(app);
 }
