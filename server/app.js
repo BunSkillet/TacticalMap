@@ -1,4 +1,8 @@
-require('dotenv').config();
+try {
+    require('dotenv').config();
+} catch (err) {
+    console.warn('dotenv not installed, skipping .env load');
+}
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
