@@ -18,6 +18,10 @@ export function centerMap() {
 }
 
 export function loadMap(name) {
+  state.mapImage.onload = () => {
+    centerMap();
+    draw();
+  };
   state.mapImage.src = `maps/${name}.jpg`;
 }
 
