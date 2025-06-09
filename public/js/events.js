@@ -146,6 +146,7 @@ function placeDraggedObject(e) {
   state.placedObjects.push(data);
   socket.emit('placeObject', data);
   state.draggedSymbol = null;
+  updateCursor();
   draw();
 }
 
@@ -274,13 +275,18 @@ export function setupEvents() {
   });
 
   document.querySelectorAll('.draggable-button').forEach(button => {
-    button.addEventListener('pointerdown', () => {
+    button.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
       state.draggedSymbol = button.dataset.symbol;
+      updateCursor();
     });
   });
 
   document.addEventListener('pointerup', () => {
-    state.draggedSymbol = null;
+    if (state.draggedSymbol) {
+      state.draggedSymbol = null;
+      updateCursor();
+    }
   });
 
   document.querySelectorAll('.tool-button').forEach(btn => {

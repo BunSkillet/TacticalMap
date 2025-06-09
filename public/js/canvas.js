@@ -114,18 +114,26 @@ export function draw() {
 }
 
 export function updateCursor() {
-  if (state.currentTool === 'pan') {
-    state.canvas.style.cursor = 'grab';
+  let cursor = 'default';
+  if (state.draggedSymbol) {
+    const svgCursor = `data:image/svg+xml;base64,${btoa(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'>` +
+      `<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='24'>${state.draggedSymbol}</text>` +
+      `</svg>`
+    )}`;
+    cursor = `url('${svgCursor}') 16 16, auto`;
+  } else if (state.currentTool === 'pan') {
+    cursor = 'grab';
   } else if (state.currentTool === 'select') {
-    state.canvas.style.cursor = 'default';
+    cursor = 'default';
   } else if (state.currentTool && state.currentColor) {
     const svgCursor = `data:image/svg+xml;base64,${btoa(
       `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='12' cy='12' r='6' fill='${state.currentColor}'/></svg>`
     )}`;
-    state.canvas.style.cursor = `url('${svgCursor}') 12 12, auto`;
-  } else {
-    state.canvas.style.cursor = 'default';
+    cursor = `url('${svgCursor}') 12 12, auto`;
   }
+  state.canvas.style.cursor = cursor;
+  document.body.style.cursor = cursor;
 }
 
 export function animate() {
