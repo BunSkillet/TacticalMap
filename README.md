@@ -56,7 +56,7 @@ tacticalMap
    ```
    npm start
    ```
-6. Open your browser and navigate to `http://localhost:3000` to access the application.
+6. Open your browser and navigate to `https://localhost:3000` to access the application.
 
 ### Environment Variables
 The server recognizes several optional environment variables:
