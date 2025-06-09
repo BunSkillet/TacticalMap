@@ -5,14 +5,17 @@ try {
 }
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
 const userManager = require('./userManager');
-const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://140.238.196.102:3000/';
+const allowedOrigin = process.env.ALLOWED_ORIGIN || 'https://140.238.196.102:3000';
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
+const SSL_KEY_PATH = process.env.SSL_KEY_PATH;
+const SSL_CERT_PATH = process.env.SSL_CERT_PATH;
 
 const RATE_LIMITS = {
     draw: 200, // ms between draw events
@@ -94,9 +97,18 @@ function rateLimited(socketId, type) {
 
 const app = express();
 app.use(helmet({ hsts: false }));
-app.use(cors({ origin: allowedOrigin}));
+app.use(cors({ origin: allowedOrigin }));
 
-let server = http.createServer(app);
+let server;
+if (SSL_KEY_PATH && SSL_CERT_PATH) {
+    const sslOptions = {
+        key: fs.readFileSync(SSL_KEY_PATH),
+        cert: fs.readFileSync(SSL_CERT_PATH)
+    };
+    server = https.createServer(sslOptions, app);
+} else {
+    server = http.createServer(app);
+}
 
 const io = socketIo(server, { cors: { origin: allowedOrigin } });
 
@@ -188,7 +200,8 @@ io.on('connection', (socket) => {
 // Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    const protocol = (SSL_KEY_PATH && SSL_CERT_PATH) ? 'https' : 'http';
+    console.log(`Server is running on port ${PORT} using ${protocol}`);
 });
 
 console.log('Serving static files from:', path.join(__dirname, '../public'));

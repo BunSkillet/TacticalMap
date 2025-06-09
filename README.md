@@ -56,13 +56,15 @@ tacticalMap
    ```
    npm start
    ```
-6. Open your browser and navigate to `http://localhost:3000` to access the application.
+6. Open your browser and navigate to `https://localhost:3000` to access the application.
 
 ### Environment Variables
 The server recognizes several optional environment variables:
 
-- `ALLOWED_ORIGIN` – URL allowed to access the server (Default port 3000).
+- `ALLOWED_ORIGIN` – URL allowed to access the server (Default `https://localhost:3000`).
 - `AUTH_TOKEN` – If set, clients must provide this token when connecting via Socket.IO.
+- `SSL_KEY_PATH` – Path to an SSL private key file. If provided along with `SSL_CERT_PATH`, the server will run over HTTPS.
+- `SSL_CERT_PATH` – Path to an SSL certificate file used for HTTPS.
 
 To supply a token on the client, store it in `localStorage` under the key `authToken` before loading the page.
 
@@ -114,7 +116,7 @@ To manage the server using `pm2`, follow these steps:
   ```
 
 ### Accessing the Application
-Once the server is running, open your browser and navigate to `http://localhost:3000` to access the application.
+Once the server is running, open your browser and navigate to `https://localhost:3000` to access the application.
 
 ## Usage
 - Select a map from the dropdown menu.
