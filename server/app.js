@@ -25,7 +25,7 @@ const RATE_LIMITS = {
 
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
-const STATE_FILE = path.join(__dirname, '../public/js/state.js');
+const STATE_FILE = path.join(__dirname, '../server/state.json');
 const MAX_ITEMS = 1000;
 
 function loadState() {
