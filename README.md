@@ -61,8 +61,8 @@ tacticalMap
 
 ### Hosting Rooms
 Create a new board by sending a `POST` request to `/host`. The response contains
-a `code` that other clients can use to join. Open `board.html?room=<code>` (or
-`index.html?room=<code>`) to connect to that room and share the board state.
+a `code` that other clients can use to join. Open `board.html?room=<code>` to
+connect to that room and share the board state.
 
 ### Environment Variables
 Set the following variables in a `.env` file or your environment:

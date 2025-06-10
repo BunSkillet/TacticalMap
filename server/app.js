@@ -188,7 +188,7 @@ app.post('/host', (req, res) => {
 
 // Serve board page directly if requested
 app.get('/board.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '../index.html'));
+    res.sendFile(path.join(__dirname, '../public/board.html'));
 });
 
 // Handle WebSocket connections
