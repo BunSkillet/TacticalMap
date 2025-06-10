@@ -28,6 +28,8 @@
       <div class="map-button-row">
         <button id="reset-view-button" class="map-button">Center Map</button>
         <button id="reset-all-button" class="map-button">Clear Map</button>
+        <button id="undo-button" class="map-button">Undo</button>
+        <button id="redo-button" class="map-button">Redo</button>
         <button id="save-image-button" class="map-button">Save Image</button>
       </div>
       <div id="collapsed-elements">
@@ -35,6 +37,8 @@
         <button id="current-tool" class="tool-button" title="Selected Tool"></button>
         <button id="reset-view-mini" class="map-button" title="Center Map">🎯</button>
         <button id="reset-all-mini" class="map-button" title="Clear Map">🗑️</button>
+        <button id="undo-mini" class="map-button" title="Undo">↩️</button>
+        <button id="redo-mini" class="map-button" title="Redo">↪️</button>
         <button id="save-image-mini" class="map-button" title="Save Image">💾</button>
       </div>
       <h3>Colours</h3>
@@ -85,6 +89,13 @@
       <p><strong>Pen</strong> - draw lines. Red lines fade after a few seconds.</p>
       <p><strong>Ping</strong> - double click or use the ping tool to create a ping ripple.</p>
       <p><strong>Objects</strong> - press and hold an icon to drag it onto the map. On touch screens you can also tap an icon, then tap the map to place it.</p>
+      <h3>Keyboard Shortcuts</h3>
+      <ul>
+        <li><strong>Ctrl+Z</strong> – Undo</li>
+        <li><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> – Redo</li>
+        <li><strong>Ctrl</strong> – Hold to pan</li>
+        <li><strong>Delete</strong> – Remove selected objects</li>
+      </ul>
     </div>
   </div>
   <script src="/socket.io/socket.io.js"></script>

@@ -33,10 +33,11 @@ const RATE_LIMITS = {
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
 // Store active rooms and their states
-const rooms = new Map(); // code -> {drawings, pings, objects, currentMap}
+// code -> {drawings, pings, objects, currentMap, historyByUser, redoByUser}
+const rooms = new Map();
 
 function createRoomState() {
-    return { drawings: [], pings: [], objects: [], currentMap: 'train' };
+    return { drawings: [], pings: [], objects: [], currentMap: 'train', historyByUser: {}, redoByUser: {} };
 }
 
 function generateRoomCode() {
@@ -97,6 +98,23 @@ function pushLimited(arr, item) {
     if (arr.length > MAX_ITEMS) {
         arr.shift();
     }
+}
+
+const HISTORY_LIMIT = 10;
+let nextId = 1;
+
+function generateId() {
+    return nextId++;
+}
+
+function recordAction(state, userId, action) {
+    if (!state.historyByUser[userId]) state.historyByUser[userId] = [];
+    if (!state.redoByUser[userId]) state.redoByUser[userId] = [];
+    state.historyByUser[userId].push(action);
+    if (state.historyByUser[userId].length > HISTORY_LIMIT) {
+        state.historyByUser[userId].shift();
+    }
+    state.redoByUser[userId] = [];
 }
 
 function emitUserList(room) {
@@ -242,8 +260,10 @@ io.on('connection', (socket) => {
     // Handle drawing events
     socket.on('draw', (data) => {
         if (!isValidDraw(data) || rateLimited(socket.id, 'draw')) return;
-        pushLimited(roomState.drawings, data);
-        socket.to(roomCode).emit('draw', data);
+        const item = { ...data, id: generateId() };
+        pushLimited(roomState.drawings, item);
+        recordAction(roomState, socket.id, { type: 'draw', id: item.id, data: data });
+        socket.to(roomCode).emit('draw', item);
     });
 
     // Handle ping events
@@ -256,8 +276,10 @@ io.on('connection', (socket) => {
     // Handle object placement events
     socket.on('placeObject', (data) => {
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
-        pushLimited(roomState.objects, data);
-        socket.to(roomCode).emit('placeObject', data);
+        const item = { ...data, id: generateId() };
+        pushLimited(roomState.objects, item);
+        recordAction(roomState, socket.id, { type: 'placeObject', id: item.id, data: data });
+        socket.to(roomCode).emit('placeObject', item);
     });
 
     // Handle object text edits
@@ -286,11 +308,14 @@ io.on('connection', (socket) => {
     socket.on('removeObjects', (indices) => {
         if (!isValidRemoveList(indices)) return;
         const toRemove = [...indices].sort((a, b) => b - a);
+        const removed = [];
         toRemove.forEach(i => {
             if (i >= 0 && i < roomState.objects.length) {
+                removed.push({ index: i, object: roomState.objects[i] });
                 roomState.objects.splice(i, 1);
             }
         });
+        if (removed.length > 0) recordAction(roomState, socket.id, { type: 'removeObjects', removed });
         socket.to(roomCode).emit('removeObjects', toRemove);
     });
 
@@ -305,8 +330,81 @@ io.on('connection', (socket) => {
 
     // Handle map clear events
     socket.on('clearMap', () => {
+        recordAction(roomState, socket.id, {
+            type: 'clearMap',
+            prev: {
+                drawings: [...roomState.drawings],
+                pings: [...roomState.pings],
+                objects: [...roomState.objects]
+            }
+        });
         clearBoard(roomState);
         io.to(roomCode).emit('mapCleared');
+        io.to(roomCode).emit('stateUpdate', roomState);
+    });
+
+    socket.on('undo', () => {
+        const history = roomState.historyByUser[socket.id];
+        if (!history || history.length === 0) return;
+        const action = history.pop();
+        if (!roomState.redoByUser[socket.id]) roomState.redoByUser[socket.id] = [];
+        roomState.redoByUser[socket.id].push(action);
+        switch (action.type) {
+            case 'draw':
+                const di = roomState.drawings.findIndex(d => d.id === action.id);
+                if (di !== -1) roomState.drawings.splice(di, 1);
+                break;
+            case 'placeObject':
+                const oi = roomState.objects.findIndex(o => o.id === action.id);
+                if (oi !== -1) roomState.objects.splice(oi, 1);
+                break;
+            case 'removeObjects':
+                action.removed.slice().sort((a,b) => a.index - b.index).forEach(({ index, object }) => {
+                    roomState.objects.splice(index, 0, object);
+                });
+                break;
+            case 'clearMap':
+                roomState.drawings = action.prev.drawings;
+                roomState.pings = action.prev.pings;
+                roomState.objects = action.prev.objects;
+                break;
+            default:
+                break;
+        }
+        io.to(roomCode).emit('stateUpdate', roomState);
+    });
+
+    socket.on('redo', () => {
+        const redo = roomState.redoByUser[socket.id];
+        if (!redo || redo.length === 0) return;
+        const action = redo.pop();
+        if (!roomState.historyByUser[socket.id]) roomState.historyByUser[socket.id] = [];
+        roomState.historyByUser[socket.id].push(action);
+        if (roomState.historyByUser[socket.id].length > HISTORY_LIMIT) {
+            roomState.historyByUser[socket.id].shift();
+        }
+        switch (action.type) {
+            case 'draw':
+                const drawObj = { ...action.data, id: action.id };
+                pushLimited(roomState.drawings, drawObj);
+                break;
+            case 'placeObject':
+                const obj = { ...action.data, id: action.id };
+                pushLimited(roomState.objects, obj);
+                break;
+            case 'removeObjects':
+                action.removed.map(r => r.index).sort((a,b) => b - a).forEach(i => {
+                    if (i >= 0 && i < roomState.objects.length) {
+                        roomState.objects.splice(i, 1);
+                    }
+                });
+                break;
+            case 'clearMap':
+                clearBoard(roomState);
+                break;
+            default:
+                break;
+        }
         io.to(roomCode).emit('stateUpdate', roomState);
     });
 
