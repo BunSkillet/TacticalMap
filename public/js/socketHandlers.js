@@ -23,12 +23,12 @@ function renderUserList(users) {
 const token = localStorage.getItem('authToken') || '';
 const params = new URLSearchParams(window.location.search);
 const room = params.get('room') || '';
-let name = params.get('name') || '';
-while (!name.trim()) {
-  name = prompt('Enter your name:') || '';
-  name = name.trim();
+let username = params.get('username') || '';
+while (!username.trim()) {
+  username = prompt('Enter your username:') || '';
+  username = username.trim();
 }
-export const socket = io({ auth: { token }, query: { room, name } });
+export const socket = io({ auth: { token }, query: { room, username } });
 
 // Helper to request a color change from the server
 export function requestColorChange(color) {

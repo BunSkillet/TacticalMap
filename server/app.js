@@ -205,7 +205,7 @@ io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     const roomCode = socket.handshake.query.room;
-    const userName = socket.handshake.query.name || '';
+    const userName = socket.handshake.query.username || '';
     if (!roomCode || !rooms.has(roomCode)) {
         socket.emit('invalidRoom');
         return socket.disconnect(true);
