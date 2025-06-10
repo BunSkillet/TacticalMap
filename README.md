@@ -32,7 +32,7 @@ tacticalMap
 ## Current Features
 - **Map Selection** – Choose between several stock CS2 maps.
 - **Drawing Tools** – Freehand pen drawing with colour selection.
-- **Ping and Draggable Objects** – Double click or use the ping tool to highlight points. Drag icons (e.g. grenade, CT, T) onto the map. On touch screens press and hold an icon to drag it, or tap the icon then tap the map to place it.
+ - **Ping and Draggable Objects** – Double click or use the ping tool to highlight points. Drag icons (e.g. grenade, AWP, anchor, CT, T) onto the map. On touch screens press and hold an icon to drag it, or tap the icon then tap the map to place it.
 - **Text Boxes** – Use the text tool to drop editable notes directly onto the canvas. Double click (or double tap on mobile) any text to edit it again.
 - **Object Selection** – Select placed objects to move or delete them. A Delete button allows removal on mobile devices.
 - **Pan and Zoom** – Scroll to zoom and drag to pan the map.
