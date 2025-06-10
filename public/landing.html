@@ -3,27 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lobby</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    body { display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; }
-    #container { text-align:center; }
-    input { margin:0.5rem; padding:0.5rem; }
-    button { margin:0.5rem; padding:0.5rem 1rem; }
-  </style>
+  <title>CS2 Tactical Board</title>
+  <link rel="stylesheet" href="css/landing.css">
 </head>
-<body>
-  <div id="container">
-    <h1>Join or Host a Board</h1>
-    <input id="name" type="text" placeholder="Your name">
-    <div>
-      <button id="host-btn">Host</button>
-    </div>
-    <div>
-      <input id="room" type="text" placeholder="Room code">
-      <button id="join-btn">Join</button>
-    </div>
-  </div>
+<body class="landing">
+  <header id="button-container">
+    <button id="host-btn" class="action-btn">Host</button>
+    <button id="join-btn" class="action-btn">Join</button>
+  </header>
+
+  <section id="description">
+    <h2>Collaborate on Strategies</h2>
+    <p>
+      Plan Counter-Strike&nbsp;2 tactics with your team on a shared map. Draw,
+      drop grenades and icons and ping locations together in real time.
+    </p>
+    <p>Create a room and share the code to start collaborating instantly.</p>
+  </section>
+
+  <section id="links">
+    <p><a href="https://github.com/CruzStella/tacticalMap" target="_blank">View the project on GitHub</a></p>
+    <p><a href="#">Donate (coming soon)</a></p>
+  </section>
+
   <script src="js/landing.js"></script>
 </body>
 </html>
