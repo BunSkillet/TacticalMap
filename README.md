@@ -32,7 +32,7 @@ tacticalMap
 - **Map Selection** – Choose between several stock CS2 maps.
 - **Drawing Tools** – Freehand pen drawing with colour selection.
 - **Ping and Draggable Objects** – Double click or use the ping tool to highlight points. Drag icons (e.g. grenade, CT, T) onto the map.
-- **Object Selection** – Select placed objects to move or delete them.
+- **Object Selection** – Select placed objects to move or delete them. A Delete button allows removal on mobile devices.
 - **Pan and Zoom** – Scroll to zoom and drag to pan the map.
 - **Context Menu** – Right click the canvas to quickly switch tools.
 - **Real‑Time Collaboration** – All drawings, pings and objects are synced between connected clients.
