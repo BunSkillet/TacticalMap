@@ -1,6 +1,25 @@
 import { state } from './state.js';
 import { draw, loadMap } from './canvas.js';
 
+function renderUserList(users) {
+  const container = document.getElementById('user-list');
+  if (!container) return;
+  const ul = container.querySelector('ul');
+  if (!ul) return;
+  ul.innerHTML = '';
+  users.forEach(u => {
+    const li = document.createElement('li');
+    const dot = document.createElement('div');
+    dot.className = 'active-user';
+    dot.style.backgroundColor = u.color || '#ff0000';
+    const span = document.createElement('span');
+    span.textContent = u.name || 'Anon';
+    li.appendChild(dot);
+    li.appendChild(span);
+    ul.appendChild(li);
+  });
+}
+
 const token = localStorage.getItem('authToken') || '';
 const params = new URLSearchParams(window.location.search);
 const room = params.get('room') || '';
@@ -23,6 +42,11 @@ export function initSocket() {
     state.placedObjects = serverState.objects;
     loadMap(serverState.currentMap);
     draw();
+  });
+
+  socket.on('userList', (users) => {
+    state.activeUsers = users;
+    renderUserList(users);
   });
 
   socket.on('draw', (data) => {

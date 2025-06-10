@@ -99,6 +99,13 @@ function pushLimited(arr, item) {
     }
 }
 
+function emitUserList(room) {
+    const users = userManager.getAllUsers()
+        .filter(u => u.room === room)
+        .map(u => ({ id: u.id, name: u.name, color: u.color }));
+    io.to(room).emit('userList', users);
+}
+
 function isValidDraw(data) {
     return data && Array.isArray(data.path) && data.path.length > 0 &&
         data.path.every(pt => typeof pt.x === 'number' && typeof pt.y === 'number') &&
@@ -210,6 +217,7 @@ io.on('connection', (socket) => {
     // Add the user and assign a color
     const user = userManager.addUser(socket.id, userName, roomCode);
     socket.emit('colorAssigned', user.color);
+    emitUserList(roomCode);
     socket.broadcast.to(roomCode).emit('userConnected', { id: socket.id, name: userName });
 
     // Handle color change requests
@@ -218,6 +226,7 @@ io.on('connection', (socket) => {
 
         if (result.success) {
             socket.emit('colorAssigned', result.color);
+            emitUserList(roomCode);
             socket.broadcast.to(roomCode).emit('colorChanged', {
                 userId: socket.id,
                 color: result.color,
@@ -307,6 +316,7 @@ io.on('connection', (socket) => {
         const removed = userManager.removeUser(socket.id);
         const name = removed ? removed.name : '';
         socket.broadcast.to(roomCode).emit('userDisconnected', { id: socket.id, name });
+        emitUserList(roomCode);
         lastEvent.delete(socket.id);
     });
 });
