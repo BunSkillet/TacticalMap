@@ -21,7 +21,22 @@ const joinBtn = document.getElementById('join-btn');
 const hostForm = document.getElementById('host-form');
 const joinForm = document.getElementById('join-form');
 
+let activeForm = null;
+
+function hideForms() {
+  hostBtn.classList.remove('active');
+  joinBtn.classList.remove('active');
+  hostForm.classList.remove('show');
+  joinForm.classList.remove('show');
+  activeForm = null;
+}
+
 function toggleForm(type) {
+  if (activeForm === type) {
+    hideForms();
+    return;
+  }
+  activeForm = type;
   if (type === 'host') {
     hostBtn.classList.add('active');
     joinBtn.classList.remove('active');
@@ -59,3 +74,15 @@ hostBtn.addEventListener('click', () => toggleForm('host'));
 joinBtn.addEventListener('click', () => toggleForm('join'));
 document.getElementById('host-confirm').addEventListener('click', hostRoom);
 document.getElementById('join-confirm').addEventListener('click', joinRoom);
+
+document.addEventListener('click', (e) => {
+  if (
+    activeForm &&
+    !hostBtn.contains(e.target) &&
+    !joinBtn.contains(e.target) &&
+    !hostForm.contains(e.target) &&
+    !joinForm.contains(e.target)
+  ) {
+    hideForms();
+  }
+});
