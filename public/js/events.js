@@ -34,6 +34,7 @@ function checkAutoCollapse() {
   } else {
     sidePanel.classList.remove('collapsed');
   }
+  resizeCanvas();
   updateCollapseButton();
   updateCollapsedUI();
 }
@@ -490,6 +491,7 @@ export function setupEvents() {
     collapseButton.addEventListener('click', () => {
       sidePanel.classList.toggle('collapsed');
       updateCollapseButton();
+      resizeCanvas();
       updateCollapsedUI();
     });
   }
