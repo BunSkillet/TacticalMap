@@ -1,4 +1,4 @@
-import { state, resetState } from './state.js';
+import { state, clearBoardState } from './state.js';
 import { resizeCanvas, centerMap, draw, loadMap, updateCursor } from './canvas.js';
 import { socket, requestColorChange } from './socketHandlers.js';
 
@@ -240,22 +240,20 @@ function setupContextMenu() {
 export function setupEvents() {
   window.addEventListener('resize', resizeCanvas);
 
-  window.addEventListener('load', () => {
-    resizeCanvas();
-    loadMap(state.mapSelect.value);
-    const redSwatch = document.querySelector('[data-color="#ff0000"]');
-    if (redSwatch) {
-      redSwatch.classList.add('active');
-      state.currentColor = '#ff0000';
-    }
-    const penTool = document.querySelector('[data-tool="pen"]');
-    if (penTool) {
-      penTool.classList.add('active');
-      state.currentTool = 'pen';
-    }
-    updateCursor();
-    draw();
-  });
+  resizeCanvas();
+  loadMap(state.mapSelect.value);
+  const redSwatch = document.querySelector('[data-color="#ff0000"]');
+  if (redSwatch) {
+    redSwatch.classList.add('active');
+    state.currentColor = '#ff0000';
+  }
+  const penTool = document.querySelector('[data-tool="pen"]');
+  if (penTool) {
+    penTool.classList.add('active');
+    state.currentTool = 'pen';
+  }
+  updateCursor();
+  draw();
 
   document.addEventListener('keydown', (e) => {
     if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedObjectIndices.length > 0) {
@@ -288,7 +286,7 @@ export function setupEvents() {
 
   document.getElementById('reset-all-button').addEventListener('click', () => {
     socket.emit('clearMap');
-    resetState();
+    clearBoardState();
     centerMap();
     draw();
   });
