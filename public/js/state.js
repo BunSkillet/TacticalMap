@@ -20,6 +20,7 @@ export const state = {
   isDrawing: false,
   isLiveDrawing: false,
   pings: [],
+  activeUsers: [],
   draggedSymbol: null,
   activePointers: new Map(),
   isPinching: false,
@@ -50,6 +51,7 @@ export function resetState() {
   state.isDrawing = false;
   state.isLiveDrawing = false;
   state.pings.length = 0;
+  state.activeUsers.length = 0;
   state.draggedSymbol = null;
   state.activePointers.clear();
   state.isPinching = false;
