@@ -7,6 +7,18 @@ const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
 const userManager = require('./userManager');
+
+// Load environment variables before referencing them
+const dotenv = require('dotenv');
+const envPath = path.join(__dirname, '..', '.env');
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.warn('Warning: .env file not found or invalid');
+} else {
+  console.log('Environment variables loaded from .env');
+}
+
 const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://tacmap.xyz';
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH;
@@ -17,16 +29,6 @@ const RATE_LIMITS = {
     ping: 1000, // ms between ping events
     placeObject: 200, // ms between object placements
 };
-
-const dotenv = require('dotenv');
-const envPath = path.join(__dirname, '..', '.env');
-const result = dotenv.config({ path: envPath });
-
-if (result.error) {
-  console.warn('Warning: .env file not found or invalid');
-} else {
-  console.log('Environment variables loaded from .env');
-}
 
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
