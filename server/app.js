@@ -215,7 +215,10 @@ io.on('connection', (socket) => {
 
         if (result.success) {
             socket.emit('colorAssigned', result.color);
-            socket.broadcast.emit('colorChanged', { userId: socket.id, color: result.color });
+            socket.broadcast.to(roomCode).emit('colorChanged', {
+                userId: socket.id,
+                color: result.color,
+            });
         } else {
             socket.emit('colorUnavailable', newColor);
         }

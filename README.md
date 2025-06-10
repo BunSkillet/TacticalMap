@@ -38,7 +38,7 @@ tacticalMap
 - **Context Menu** – Right click the canvas to quickly switch tools.
 - **Real‑Time Collaboration** – All drawings, pings and objects are synced between connected clients.
 - **User Colour Management** – The server assigns each user a unique colour and prevents conflicts.
-- **State Persistence** – Server state is written to `server/state.json` and old entries are pruned to keep the file small.
+- **Multi-Room Support** – Each board has an isolated state identified by a unique 4‑digit code returned from the `/host` endpoint.
 - **Request Validation and Rate Limiting** – Basic checks guard against malformed or abusive client data.
 - **Security Hardening** – Optional authentication token and CORS origin control via environment variables.
 - **Automated Tests** – `npm test` runs simple unit tests for user management.
@@ -57,6 +57,11 @@ tacticalMap
    npm start
    ```
 4. Open `https://localhost:3000` in your browser. If SSL certificates are not configured the server falls back to HTTP on the same port.
+
+### Hosting Rooms
+Create a new board by sending a `POST` request to `/host`. The response contains
+a `code` that other clients can use to join. Open `board.html?room=<code>` (or
+`index.html?room=<code>`) to connect to that room and share the board state.
 
 ### Environment Variables
 Set the following variables in a `.env` file or your environment:
