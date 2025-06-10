@@ -130,6 +130,8 @@ export function updateCursor() {
     cursor = 'grab';
   } else if (state.currentTool === 'select') {
     cursor = 'default';
+  } else if (state.currentTool === 'text') {
+    cursor = 'text';
   } else if (state.currentTool && state.currentColor) {
     const svgCursor = `data:image/svg+xml;base64,${btoa(
       `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='12' cy='12' r='6' fill='${state.currentColor}'/></svg>`

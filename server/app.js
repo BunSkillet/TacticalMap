@@ -96,8 +96,15 @@ function isValidPing(data) {
 }
 
 function isValidObject(data) {
-    return data && typeof data.symbol === 'string' && data.symbol.length <= 2 &&
-        typeof data.x === 'number' && typeof data.y === 'number';
+    return data && typeof data.symbol === 'string' && data.symbol.length <= 50 &&
+        typeof data.x === 'number' && typeof data.y === 'number' &&
+        (!data.type || data.type === 'symbol' || data.type === 'text');
+}
+
+function isValidEdit(data) {
+    return data && typeof data.index === 'number' &&
+        typeof data.symbol === 'string' && data.symbol.length <= 50 &&
+        (!data.type || data.type === 'text' || data.type === 'symbol');
 }
 
 function isValidMoveList(arr) {
@@ -208,6 +215,17 @@ io.on('connection', (socket) => {
         pushLimited(state.objects, data);
         socket.broadcast.emit('placeObject', data); // Broadcast to other clients
         saveState();
+    });
+
+    // Handle object text edits
+    socket.on('editObject', (data) => {
+        if (!isValidEdit(data)) return;
+        if (state.objects[data.index]) {
+            state.objects[data.index].symbol = data.symbol;
+            state.objects[data.index].type = data.type || state.objects[data.index].type;
+            socket.broadcast.emit('editObject', data);
+            saveState();
+        }
     });
 
     // Handle object movement events
