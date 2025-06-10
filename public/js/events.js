@@ -380,6 +380,13 @@ function placeDraggedObject(e) {
   draw();
 }
 
+function saveCanvasImage() {
+  const link = document.createElement('a');
+  link.download = 'tactical-board.png';
+  link.href = state.canvas.toDataURL('image/png');
+  link.click();
+}
+
 function setupContextMenu() {
   const customMenu = document.createElement('div');
   customMenu.id = 'custom-context-menu';
@@ -550,6 +557,10 @@ export function setupEvents() {
       updateDeleteButtonVisibility();
     });
   }
+
+  document.getElementById('save-image-button').addEventListener('click', saveCanvasImage);
+  const miniSave = document.getElementById('save-image-mini');
+  if (miniSave) miniSave.addEventListener('click', saveCanvasImage);
 
   document.querySelectorAll('.draggable-button').forEach(button => {
     button.addEventListener('pointerdown', (e) => {
