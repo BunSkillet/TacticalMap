@@ -2,7 +2,9 @@ import { state } from './state.js';
 import { draw, loadMap } from './canvas.js';
 
 const token = localStorage.getItem('authToken') || '';
-export const socket = io({ auth: { token } });
+const params = new URLSearchParams(window.location.search);
+const room = params.get('room') || '';
+export const socket = io({ auth: { token }, query: { room } });
 
 // Helper to request a color change from the server
 export function requestColorChange(color) {

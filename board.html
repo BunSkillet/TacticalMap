@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS2 Tactical Board</title>
+  <link rel="stylesheet" href="css/style.css"> <!-- Link to external CSS -->
+</head>
+<body>
+  <div id="main">
+    <div id="canvas-container">
+      <canvas id="mapCanvas"></canvas>
+    </div>
+    <div id="side-panel">
+      <button id="collapse-button" title="Collapse">&gt;&gt;</button>
+      <label for="map-select"><strong>Choose Map:</strong></label>
+      <select id="map-select">
+        <!-- Ensure map names match the files in the /maps/ directory -->
+        <option value="train">Train</option>
+        <option value="mirage">Mirage</option>
+        <option value="nuke">Nuke</option>
+        <option value="ancient">Ancient</option>
+        <option value="anubis">Anubis</option>
+        <option value="inferno">Inferno</option>
+        <option value="dust2">Dust 2</option>
+      </select>
+      <div class="map-button-row">
+        <button id="reset-view-button" class="map-button">Center Map</button>
+        <button id="reset-all-button" class="map-button">Clear Map</button>
+      </div>
+      <div id="collapsed-elements">
+        <div id="current-color" title="Selected Colour"></div>
+        <button id="current-tool" class="tool-button" title="Selected Tool"></button>
+        <button id="reset-view-mini" class="map-button" title="Center Map">🎯</button>
+        <button id="reset-all-mini" class="map-button" title="Clear Map">🗑️</button>
+      </div>
+      <h3>Colours</h3>
+      <div class="color-picker-container">
+        <!-- Ensure colors match the JavaScript logic -->
+        <div class="color-swatch" style="background-color: #eda338" data-color="#eda338" title="Orange"></div>
+        <div class="color-swatch" style="background-color: #109856" data-color="#109856" title="Green"></div>
+        <div class="color-swatch" style="background-color: #68a3e5" data-color="#68a3e5" title="Blue"></div>
+        <div class="color-swatch" style="background-color: #e6f13d" data-color="#e6f13d" title="Yellow"></div>
+        <div class="color-swatch" style="background-color: #803ca1" data-color="#803ca1" title="Purple"></div>
+        <div class="color-swatch" style="background-color: #ff0000" data-color="#ff0000" title="Red"></div>
+      </div>
+      <h3>Tools</h3>
+      <div class="draggable-container">
+        <!-- Ensure tools match the JavaScript logic -->
+        <button class="tool-button" data-tool="select" title="Select Tool">🖱️</button>
+        <button class="tool-button" data-tool="pan" title="Pan Tool">🖐️</button>
+        <button class="tool-button" data-tool="pen" title="Pen Tool">✏️</button>
+        <button class="tool-button" data-tool="text" title="Text Tool">🔤</button>
+        <button class="tool-button" data-tool="ping" title="Ping Tool">📍</button>
+      </div>
+      <h3>Draggable Objects</h3>
+      <div class="draggable-container">
+        <!-- Ensure draggable objects match the JavaScript logic -->
+        <div class="draggable-button" data-symbol="💥" title="Flash">💥</div>
+        <div class="draggable-button" data-symbol="💣" title="Bomb">💣</div>
+        <div class="draggable-button" data-symbol="🔥" title="Molotov">🔥</div>
+        <div class="draggable-button" data-symbol="💨" title="Smoke">💨</div>
+        <div class="draggable-button" data-symbol="🎯" title="Decoy">🎯</div>
+        <div class="draggable-button" data-symbol="CT" title="Counter-Terrorist">CT</div>
+        <div class="draggable-button" data-symbol="T" title="Terrorist">T</div>
+      </div>
+      <button id="delete-objects-button" class="action-button">Delete Selected</button>
+      <button id="help-button" title="Help" class="help-button">Help</button>
+    </div>
+  </div>
+  <div id="help-modal">
+    <div id="help-content">
+      <h2>Board Help</h2>
+      <p><strong>Select</strong> - drag to select placed objects then press Delete or tap the Delete button to remove them.</p>
+      <p><strong>Pan</strong> - hold Ctrl or choose the hand icon to move the map.</p>
+      <p><strong>Pen</strong> - draw lines. Red lines fade after a few seconds.</p>
+      <p><strong>Ping</strong> - double click or use the ping tool to create a ping ripple.</p>
+      <p><strong>Objects</strong> - press and hold an icon to drag it onto the map. On touch screens you can also tap an icon, then tap the map to place it.</p>
+      <button id="close-help">Close</button>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

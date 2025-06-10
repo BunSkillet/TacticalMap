@@ -30,6 +30,21 @@ if (result.error) {
 
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
+// Store active rooms and their states
+const rooms = new Map(); // code -> {drawings, pings, objects, currentMap}
+
+function createRoomState() {
+    return { drawings: [], pings: [], objects: [], currentMap: 'train' };
+}
+
+function generateRoomCode() {
+    let code;
+    do {
+        code = Math.floor(1000 + Math.random() * 9000).toString();
+    } while (rooms.has(code));
+    return code;
+}
+
 const STATE_FILE = path.join(__dirname, '../server/state.json');
 const MAX_ITEMS = 1000;
 
@@ -55,9 +70,10 @@ function loadState() {
     };
 }
 
-function saveState() {
+function saveState(s) {
+    // Persist a single room state to disk if desired in future
     try {
-        fs.writeFileSync(STATE_FILE, JSON.stringify(state));
+        fs.writeFileSync(STATE_FILE, JSON.stringify(s));
     } catch (err) {
         console.error('Failed to save state file:', err);
     }
@@ -65,16 +81,13 @@ function saveState() {
 
 function refreshState() {
     const data = loadState();
-    state.drawings = data.drawings;
-    state.pings = data.pings;
-    state.objects = data.objects;
-    state.currentMap = data.currentMap;
+    return { ...data };
 }
 
-function clearBoard() {
-    state.drawings = [];
-    state.pings = [];
-    state.objects = [];
+function clearBoard(s) {
+    s.drawings = [];
+    s.pings = [];
+    s.objects = [];
 }
 
 function pushLimited(arr, item) {
@@ -135,6 +148,7 @@ function rateLimited(socketId, type) {
 const app = express();
 app.use(helmet({ hsts: false }));
 app.use(cors({ origin: allowedOrigin }));
+app.use(express.json());
 
 let server;
 if (SSL_KEY_PATH && SSL_CERT_PATH) {
@@ -156,9 +170,6 @@ io.use((socket, next) => {
     return next(new Error('Unauthorized'));
 });
 
-// Load existing state from disk or start with defaults
-const state = loadState();
-saveState();
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
@@ -168,14 +179,35 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
+// Endpoint to create a new room
+app.post('/host', (req, res) => {
+    const code = generateRoomCode();
+    rooms.set(code, createRoomState());
+    res.json({ code });
+});
+
+// Serve board page directly if requested
+app.get('/board.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html'));
+});
+
 // Handle WebSocket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
+    const roomCode = socket.handshake.query.room;
+    if (!roomCode || !rooms.has(roomCode)) {
+        socket.emit('invalidRoom');
+        return socket.disconnect(true);
+    }
+
+    socket.join(roomCode);
+    const roomState = rooms.get(roomCode);
+
     // Add the user and assign a color
     const user = userManager.addUser(socket.id);
     socket.emit('colorAssigned', user.color);
-    socket.broadcast.emit('userConnected', socket.id);
+    socket.broadcast.to(roomCode).emit('userConnected', socket.id);
 
     // Handle color change requests
     socket.on('changeColor', (newColor) => {
@@ -190,41 +222,36 @@ io.on('connection', (socket) => {
     });
 
     // Send the current state to the new client
-    refreshState();
-    socket.emit('stateUpdate', state);
+    socket.emit('stateUpdate', roomState);
 
     // Handle drawing events
     socket.on('draw', (data) => {
         if (!isValidDraw(data) || rateLimited(socket.id, 'draw')) return;
-        pushLimited(state.drawings, data);
-        socket.broadcast.emit('draw', data); // Broadcast to other clients
-        saveState();
+        pushLimited(roomState.drawings, data);
+        socket.to(roomCode).emit('draw', data);
     });
 
     // Handle ping events
     socket.on('ping', (data) => {
         if (!isValidPing(data) || rateLimited(socket.id, 'ping')) return;
-        pushLimited(state.pings, data);
-        socket.broadcast.emit('ping', data); // Broadcast to other clients
-        saveState();
+        pushLimited(roomState.pings, data);
+        socket.to(roomCode).emit('ping', data);
     });
 
     // Handle object placement events
     socket.on('placeObject', (data) => {
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
-        pushLimited(state.objects, data);
-        socket.broadcast.emit('placeObject', data); // Broadcast to other clients
-        saveState();
+        pushLimited(roomState.objects, data);
+        socket.to(roomCode).emit('placeObject', data);
     });
 
     // Handle object text edits
     socket.on('editObject', (data) => {
         if (!isValidEdit(data)) return;
-        if (state.objects[data.index]) {
-            state.objects[data.index].symbol = data.symbol;
-            state.objects[data.index].type = data.type || state.objects[data.index].type;
-            socket.broadcast.emit('editObject', data);
-            saveState();
+        if (roomState.objects[data.index]) {
+            roomState.objects[data.index].symbol = data.symbol;
+            roomState.objects[data.index].type = data.type || roomState.objects[data.index].type;
+            socket.to(roomCode).emit('editObject', data);
         }
     });
 
@@ -232,13 +259,12 @@ io.on('connection', (socket) => {
     socket.on('moveObjects', (updates) => {
         if (!isValidMoveList(updates)) return;
         updates.forEach(u => {
-            if (state.objects[u.index]) {
-                state.objects[u.index].x = u.x;
-                state.objects[u.index].y = u.y;
+            if (roomState.objects[u.index]) {
+                roomState.objects[u.index].x = u.x;
+                roomState.objects[u.index].y = u.y;
             }
         });
-        socket.broadcast.emit('moveObjects', updates);
-        saveState();
+        socket.to(roomCode).emit('moveObjects', updates);
     });
 
     // Handle object removal events
@@ -246,37 +272,34 @@ io.on('connection', (socket) => {
         if (!isValidRemoveList(indices)) return;
         const toRemove = [...indices].sort((a, b) => b - a);
         toRemove.forEach(i => {
-            if (i >= 0 && i < state.objects.length) {
-                state.objects.splice(i, 1);
+            if (i >= 0 && i < roomState.objects.length) {
+                roomState.objects.splice(i, 1);
             }
         });
-        socket.broadcast.emit('removeObjects', toRemove);
-        saveState();
+        socket.to(roomCode).emit('removeObjects', toRemove);
     });
 
     // Handle map change events
     socket.on('changeMap', (mapName) => {
-        state.currentMap = mapName;
-        state.drawings = [];
-        state.pings = [];
-        state.objects = [];
-        io.emit('mapChanged', mapName); // Broadcast to all clients
-        saveState();
+        roomState.currentMap = mapName;
+        roomState.drawings = [];
+        roomState.pings = [];
+        roomState.objects = [];
+        io.to(roomCode).emit('mapChanged', mapName);
     });
 
     // Handle map clear events
     socket.on('clearMap', () => {
-        clearBoard();
-        io.emit('mapCleared'); // Broadcast to all clients
-        io.emit('stateUpdate', state);
-        saveState();
+        clearBoard(roomState);
+        io.to(roomCode).emit('mapCleared');
+        io.to(roomCode).emit('stateUpdate', roomState);
     });
 
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
         userManager.removeUser(socket.id);
-        socket.broadcast.emit('userDisconnected', socket.id);
+        socket.broadcast.to(roomCode).emit('userDisconnected', socket.id);
     });
 });
 
