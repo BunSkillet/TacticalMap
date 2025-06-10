@@ -44,3 +44,15 @@ export function resetState() {
   state.pings.length = 0;
   state.draggedSymbol = null;
 }
+
+export function clearBoardState() {
+  state.selectionRect = null;
+  state.placedObjects.length = 0;
+  state.selectedObjectIndices = [];
+  state.penPath = [];
+  state.penPaths.length = 0;
+  state.isDrawing = false;
+  state.isLiveDrawing = false;
+  state.pings.length = 0;
+  state.draggedSymbol = null;
+}
