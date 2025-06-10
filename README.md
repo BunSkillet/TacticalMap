@@ -65,8 +65,8 @@ a `code` that other clients can use to join. Open `board.html?room=<code>` to
 connect to that room and share the board state.
 
 ### Environment Variables
-Set the following variables in a `.env` file or your environment:
-- `ALLOWED_ORIGIN` – Allowed CORS origin (`https://localhost:3000` by default).
+-Set the following variables in a `.env` file or your environment:
+- `ALLOWED_ORIGIN` – Allowed CORS origin (`http://tacmap.xyz` by default).
 - `AUTH_TOKEN` – Require clients to provide this token when connecting.
 - `SSL_KEY_PATH` and `SSL_CERT_PATH` – Enable HTTPS by providing paths to a certificate and key.
 
