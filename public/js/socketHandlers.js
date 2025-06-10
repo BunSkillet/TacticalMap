@@ -52,4 +52,11 @@ export function initSocket() {
     loadMap(mapName);
     draw();
   });
+
+  socket.on('mapCleared', () => {
+    state.placedObjects = [];
+    state.penPaths = [];
+    state.pings = [];
+    draw();
+  });
 }
