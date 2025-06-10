@@ -25,7 +25,9 @@ export const state = {
   isPinching: false,
   initialPinchDistance: 0,
   initialScale: 1,
-  initialWorldCenter: { x: 0, y: 0 }
+  initialWorldCenter: { x: 0, y: 0 },
+  activeTextInput: null,
+  editingObjectIndex: null
 };
 
 state.ctx = state.canvas.getContext('2d');
@@ -53,6 +55,8 @@ export function resetState() {
   state.initialPinchDistance = 0;
   state.initialScale = 1;
   state.initialWorldCenter = { x: 0, y: 0 };
+  state.activeTextInput = null;
+  state.editingObjectIndex = null;
 }
 
 export function clearBoardState() {
@@ -65,4 +69,6 @@ export function clearBoardState() {
   state.isLiveDrawing = false;
   state.pings.length = 0;
   state.draggedSymbol = null;
+  state.activeTextInput = null;
+  state.editingObjectIndex = null;
 }

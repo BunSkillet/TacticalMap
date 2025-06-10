@@ -118,6 +118,18 @@ button.tool-button.active {
 .draggable-button:active {
   cursor: grabbing;
 }
+.text-editor {
+  position: absolute;
+  min-width: 100px;
+  min-height: 30px;
+  font-size: 16px;
+  padding: 2px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  resize: none;
+  z-index: 1500;
+}
+
 .draggable-container {
   display: flex;
   flex-wrap: wrap;
