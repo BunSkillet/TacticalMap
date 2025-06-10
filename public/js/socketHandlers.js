@@ -4,7 +4,12 @@ import { draw, loadMap } from './canvas.js';
 const token = localStorage.getItem('authToken') || '';
 const params = new URLSearchParams(window.location.search);
 const room = params.get('room') || '';
-export const socket = io({ auth: { token }, query: { room } });
+let name = params.get('name') || '';
+while (!name.trim()) {
+  name = prompt('Enter your name:') || '';
+  name = name.trim();
+}
+export const socket = io({ auth: { token }, query: { room, name } });
 
 // Helper to request a color change from the server
 export function requestColorChange(color) {
@@ -88,5 +93,13 @@ export function initSocket() {
     state.penPaths = [];
     state.pings = [];
     draw();
+  });
+
+  socket.on('userConnected', (u) => {
+    if (u && u.name) console.log(`${u.name} joined`);
+  });
+
+  socket.on('userDisconnected', (u) => {
+    if (u && u.name) console.log(`${u.name} left`);
   });
 }

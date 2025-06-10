@@ -26,14 +26,19 @@
   </div>
   <script>
     const nameInput = document.getElementById('name');
+    function getName() {
+      return nameInput.value.trim();
+    }
     document.getElementById('host-btn').addEventListener('click', () => {
-      const name = encodeURIComponent(nameInput.value.trim());
-      window.location.href = `board.html?name=${name}&host=1`;
+      const name = getName();
+      if (!name) return alert('Please enter your name');
+      window.location.href = `board.html?name=${encodeURIComponent(name)}&host=1`;
     });
     document.getElementById('join-btn').addEventListener('click', () => {
-      const name = encodeURIComponent(nameInput.value.trim());
+      const name = getName();
+      if (!name) return alert('Please enter your name');
       const room = encodeURIComponent(document.getElementById('room').value.trim());
-      window.location.href = `board.html?name=${name}&room=${room}`;
+      window.location.href = `board.html?name=${encodeURIComponent(name)}&room=${room}`;
     });
   </script>
 </body>
