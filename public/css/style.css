@@ -38,6 +38,7 @@ html, body {
   flex-direction: column;
   overflow-y: auto;
   user-select: none;
+  cursor: default; /* Keep default cursor inside the sidebar */
 }
 h3 {
   margin-top: 20px;
