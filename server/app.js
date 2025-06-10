@@ -33,10 +33,11 @@ const RATE_LIMITS = {
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
 // Store active rooms and their states
-const rooms = new Map(); // code -> {drawings, pings, objects, currentMap, history, redo}
+// code -> {drawings, pings, objects, currentMap, historyByUser, redoByUser}
+const rooms = new Map();
 
 function createRoomState() {
-    return { drawings: [], pings: [], objects: [], currentMap: 'train', history: [], redo: [] };
+    return { drawings: [], pings: [], objects: [], currentMap: 'train', historyByUser: {}, redoByUser: {} };
 }
 
 function generateRoomCode() {
@@ -99,14 +100,21 @@ function pushLimited(arr, item) {
     }
 }
 
-const MAX_HISTORY = 100;
+const HISTORY_LIMIT = 10;
+let nextId = 1;
 
-function recordAction(state, action) {
-    if (!state.history) state.history = [];
-    if (!state.redo) state.redo = [];
-    state.history.push(action);
-    if (state.history.length > MAX_HISTORY) state.history.shift();
-    state.redo = [];
+function generateId() {
+    return nextId++;
+}
+
+function recordAction(state, userId, action) {
+    if (!state.historyByUser[userId]) state.historyByUser[userId] = [];
+    if (!state.redoByUser[userId]) state.redoByUser[userId] = [];
+    state.historyByUser[userId].push(action);
+    if (state.historyByUser[userId].length > HISTORY_LIMIT) {
+        state.historyByUser[userId].shift();
+    }
+    state.redoByUser[userId] = [];
 }
 
 function emitUserList(room) {
@@ -252,9 +260,10 @@ io.on('connection', (socket) => {
     // Handle drawing events
     socket.on('draw', (data) => {
         if (!isValidDraw(data) || rateLimited(socket.id, 'draw')) return;
-        pushLimited(roomState.drawings, data);
-        recordAction(roomState, { type: 'draw', data });
-        socket.to(roomCode).emit('draw', data);
+        const item = { ...data, id: generateId() };
+        pushLimited(roomState.drawings, item);
+        recordAction(roomState, socket.id, { type: 'draw', id: item.id, data: data });
+        socket.to(roomCode).emit('draw', item);
     });
 
     // Handle ping events
@@ -267,9 +276,10 @@ io.on('connection', (socket) => {
     // Handle object placement events
     socket.on('placeObject', (data) => {
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
-        pushLimited(roomState.objects, data);
-        recordAction(roomState, { type: 'placeObject', data });
-        socket.to(roomCode).emit('placeObject', data);
+        const item = { ...data, id: generateId() };
+        pushLimited(roomState.objects, item);
+        recordAction(roomState, socket.id, { type: 'placeObject', id: item.id, data: data });
+        socket.to(roomCode).emit('placeObject', item);
     });
 
     // Handle object text edits
@@ -305,7 +315,7 @@ io.on('connection', (socket) => {
                 roomState.objects.splice(i, 1);
             }
         });
-        if (removed.length > 0) recordAction(roomState, { type: 'removeObjects', removed });
+        if (removed.length > 0) recordAction(roomState, socket.id, { type: 'removeObjects', removed });
         socket.to(roomCode).emit('removeObjects', toRemove);
     });
 
@@ -320,7 +330,7 @@ io.on('connection', (socket) => {
 
     // Handle map clear events
     socket.on('clearMap', () => {
-        recordAction(roomState, {
+        recordAction(roomState, socket.id, {
             type: 'clearMap',
             prev: {
                 drawings: [...roomState.drawings],
@@ -334,15 +344,19 @@ io.on('connection', (socket) => {
     });
 
     socket.on('undo', () => {
-        const action = roomState.history.pop();
-        if (!action) return;
-        roomState.redo.push(action);
+        const history = roomState.historyByUser[socket.id];
+        if (!history || history.length === 0) return;
+        const action = history.pop();
+        if (!roomState.redoByUser[socket.id]) roomState.redoByUser[socket.id] = [];
+        roomState.redoByUser[socket.id].push(action);
         switch (action.type) {
             case 'draw':
-                if (roomState.drawings.length > 0) roomState.drawings.pop();
+                const di = roomState.drawings.findIndex(d => d.id === action.id);
+                if (di !== -1) roomState.drawings.splice(di, 1);
                 break;
             case 'placeObject':
-                if (roomState.objects.length > 0) roomState.objects.pop();
+                const oi = roomState.objects.findIndex(o => o.id === action.id);
+                if (oi !== -1) roomState.objects.splice(oi, 1);
                 break;
             case 'removeObjects':
                 action.removed.slice().sort((a,b) => a.index - b.index).forEach(({ index, object }) => {
@@ -361,15 +375,22 @@ io.on('connection', (socket) => {
     });
 
     socket.on('redo', () => {
-        const action = roomState.redo.pop();
-        if (!action) return;
-        roomState.history.push(action);
+        const redo = roomState.redoByUser[socket.id];
+        if (!redo || redo.length === 0) return;
+        const action = redo.pop();
+        if (!roomState.historyByUser[socket.id]) roomState.historyByUser[socket.id] = [];
+        roomState.historyByUser[socket.id].push(action);
+        if (roomState.historyByUser[socket.id].length > HISTORY_LIMIT) {
+            roomState.historyByUser[socket.id].shift();
+        }
         switch (action.type) {
             case 'draw':
-                pushLimited(roomState.drawings, action.data);
+                const drawObj = { ...action.data, id: action.id };
+                pushLimited(roomState.drawings, drawObj);
                 break;
             case 'placeObject':
-                pushLimited(roomState.objects, action.data);
+                const obj = { ...action.data, id: action.id };
+                pushLimited(roomState.objects, obj);
                 break;
             case 'removeObjects':
                 action.removed.map(r => r.index).sort((a,b) => b - a).forEach(i => {
