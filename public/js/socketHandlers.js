@@ -52,6 +52,14 @@ export function initSocket() {
     draw();
   });
 
+  socket.on('editObject', (data) => {
+    if (state.placedObjects[data.index]) {
+      state.placedObjects[data.index].symbol = data.symbol;
+      if (data.type) state.placedObjects[data.index].type = data.type;
+      draw();
+    }
+  });
+
   socket.on('colorAssigned', (color) => {
     state.currentColor = color;
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
