@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; }
+    #container { text-align:center; }
+    input { margin:0.5rem; padding:0.5rem; }
+    button { margin:0.5rem; padding:0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Join or Host a Board</h1>
+    <input id="name" type="text" placeholder="Your name">
+    <div>
+      <button id="host-btn">Host</button>
+    </div>
+    <div>
+      <input id="room" type="text" placeholder="Room code">
+      <button id="join-btn">Join</button>
+    </div>
+  </div>
+  <script>
+    const nameInput = document.getElementById('name');
+    document.getElementById('host-btn').addEventListener('click', () => {
+      const name = encodeURIComponent(nameInput.value.trim());
+      window.location.href = `board.html?name=${name}&host=1`;
+    });
+    document.getElementById('join-btn').addEventListener('click', () => {
+      const name = encodeURIComponent(nameInput.value.trim());
+      const room = encodeURIComponent(document.getElementById('room').value.trim());
+      window.location.href = `board.html?name=${name}&room=${room}`;
+    });
+  </script>
+</body>
+</html>
