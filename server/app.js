@@ -196,6 +196,7 @@ io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     const roomCode = socket.handshake.query.room;
+    const userName = socket.handshake.query.name || '';
     if (!roomCode || !rooms.has(roomCode)) {
         socket.emit('invalidRoom');
         return socket.disconnect(true);
@@ -205,9 +206,9 @@ io.on('connection', (socket) => {
     const roomState = rooms.get(roomCode);
 
     // Add the user and assign a color
-    const user = userManager.addUser(socket.id);
+    const user = userManager.addUser(socket.id, userName);
     socket.emit('colorAssigned', user.color);
-    socket.broadcast.to(roomCode).emit('userConnected', socket.id);
+    socket.broadcast.to(roomCode).emit('userConnected', { id: socket.id, name: userName });
 
     // Handle color change requests
     socket.on('changeColor', (newColor) => {
@@ -301,8 +302,9 @@ io.on('connection', (socket) => {
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
-        userManager.removeUser(socket.id);
-        socket.broadcast.to(roomCode).emit('userDisconnected', socket.id);
+        const removed = userManager.removeUser(socket.id);
+        const name = removed ? removed.name : '';
+        socket.broadcast.to(roomCode).emit('userDisconnected', { id: socket.id, name });
     });
 });
 
