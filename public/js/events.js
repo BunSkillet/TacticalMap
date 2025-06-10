@@ -2,6 +2,13 @@ import { state, clearBoardState } from './state.js';
 import { resizeCanvas, centerMap, draw, loadMap, updateCursor } from './canvas.js';
 import { socket, requestColorChange } from './socketHandlers.js';
 
+const deleteButton = document.getElementById('delete-objects-button');
+
+function updateDeleteButtonVisibility() {
+  if (!deleteButton) return;
+  deleteButton.style.display = state.selectedObjectIndices.length > 0 ? 'block' : 'none';
+}
+
 function handlePointerDown(e) {
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
@@ -93,6 +100,7 @@ function handlePointerUp(e) {
 
     state.selectionRect = null;
     draw();
+    updateDeleteButtonVisibility();
     return;
   }
 
@@ -106,6 +114,7 @@ function handlePointerUp(e) {
     }
     state.penPath = [];
     draw();
+    updateDeleteButtonVisibility();
     return;
   }
 
@@ -113,6 +122,7 @@ function handlePointerUp(e) {
     state.isDragging = false;
     updateCursor();
   }
+  updateDeleteButtonVisibility();
 }
 
 function handlePointerMove(e) {
@@ -317,6 +327,7 @@ export function setupEvents() {
   }
   updateCursor();
   draw();
+  updateDeleteButtonVisibility();
 
   document.addEventListener('keydown', (e) => {
     if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedObjectIndices.length > 0) {
@@ -326,11 +337,24 @@ export function setupEvents() {
       indices.sort((a, b) => b - a).forEach(i => state.placedObjects.splice(i, 1));
       state.selectedObjectIndices = [];
       draw();
+      updateDeleteButtonVisibility();
     }
     if (e.key === 'Control' && !state.isDragging) {
       state.canvas.style.cursor = 'grab';
     }
   });
+
+  if (deleteButton) {
+    deleteButton.addEventListener('click', () => {
+      if (state.selectedObjectIndices.length === 0) return;
+      const indices = state.selectedObjectIndices.slice();
+      socket.emit('removeObjects', indices);
+      indices.sort((a, b) => b - a).forEach(i => state.placedObjects.splice(i, 1));
+      state.selectedObjectIndices = [];
+      draw();
+      updateDeleteButtonVisibility();
+    });
+  }
 
   document.addEventListener('keyup', (e) => {
     if (e.key === 'Control' && !state.isDragging) {
@@ -355,6 +379,7 @@ export function setupEvents() {
     clearBoardState();
     centerMap();
     draw();
+    updateDeleteButtonVisibility();
   });
 
   document.querySelectorAll('.draggable-button').forEach(button => {
@@ -406,6 +431,7 @@ export function setupEvents() {
     state.penPaths.length = 0;
     socket.emit('changeMap', state.mapSelect.value);
     loadMap(state.mapSelect.value);
+    updateDeleteButtonVisibility();
   });
 
   const helpButton = document.getElementById('help-button');
