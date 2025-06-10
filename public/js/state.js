@@ -27,7 +27,8 @@ export const state = {
   initialScale: 1,
   initialWorldCenter: { x: 0, y: 0 },
   activeTextInput: null,
-  editingObjectIndex: null
+  editingObjectIndex: null,
+  lastTapTime: 0
 };
 
 state.ctx = state.canvas.getContext('2d');
@@ -57,6 +58,7 @@ export function resetState() {
   state.initialWorldCenter = { x: 0, y: 0 };
   state.activeTextInput = null;
   state.editingObjectIndex = null;
+  state.lastTapTime = 0;
 }
 
 export function clearBoardState() {
@@ -71,4 +73,5 @@ export function clearBoardState() {
   state.draggedSymbol = null;
   state.activeTextInput = null;
   state.editingObjectIndex = null;
+  state.lastTapTime = 0;
 }

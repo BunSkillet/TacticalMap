@@ -101,6 +101,26 @@ function handlePointerDown(e) {
     // When an object icon is selected, ignore tool interactions
     return;
   }
+  if (e.pointerType === 'touch') {
+    const now = Date.now();
+    if (now - state.lastTapTime < 300) {
+      const rect = state.canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left - state.offsetX) / state.scale;
+      const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+      const idx = state.placedObjects.findIndex(obj => {
+        const dx = x - obj.x;
+        const dy = y - obj.y;
+        return Math.sqrt(dx * dx + dy * dy) < 20 / state.scale && obj.type === 'text';
+      });
+      if (idx !== -1) {
+        e.preventDefault();
+        openTextEditor(state.placedObjects[idx].x, state.placedObjects[idx].y, idx);
+        state.lastTapTime = 0;
+        return;
+      }
+    }
+    state.lastTapTime = now;
+  }
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
@@ -297,6 +317,14 @@ function handlePointerMove(e) {
   updateCursor();
 }
 
+function handleCanvasClick(e) {
+  if (state.currentTool !== 'text' || state.activeTextInput) return;
+  const rect = state.canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left - state.offsetX) / state.scale;
+  const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+  openTextEditor(x, y);
+}
+
 function handleWheel(e) {
   e.preventDefault();
   const rect = state.canvas.getBoundingClientRect();
@@ -485,6 +513,7 @@ export function setupEvents() {
   state.canvas.addEventListener('pointercancel', handlePointerUp);
   state.canvas.addEventListener('pointermove', handlePointerMove);
   state.canvas.addEventListener('pointerup', placeDraggedObject);
+  state.canvas.addEventListener('click', handleCanvasClick);
   state.canvas.addEventListener('dblclick', handleDoubleClick);
 
   if (collapseButton) {
