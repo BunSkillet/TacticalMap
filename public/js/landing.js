@@ -1,6 +1,10 @@
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('invalidRoom') === '1') {
   alert('Invalid room code');
+  // remove the query parameter so the alert doesn't keep showing
+  urlParams.delete('invalidRoom');
+  const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+  window.history.replaceState({}, '', newUrl);
 }
 
 const header = document.getElementById('button-container');
