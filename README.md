@@ -7,6 +7,8 @@ The CS2 Tactical Board is a real-time collaborative whiteboard for Counter-Strik
 ```
 tacticalMap
 ├── public                # Static client files served by Express
+│   ├── board.html        # Board interface
+│   ├── landing.html      # Landing screen
 │   ├── css
 │   │   └── style.css     # Styles for the web interface
 │   ├── js
@@ -21,7 +23,6 @@ tacticalMap
 │   └── userManager.js    # Assigns and tracks user colours
 ├── test                  # Minimal unit tests
 │   └── userManager.test.js
-├── index.html            # Web application entry point
 ├── ecosystem.config.js   # pm2 configuration
 ├── webhook.js            # Simple GitHub webhook for deployments
 ├── package.json          # npm configuration and scripts
