@@ -41,6 +41,7 @@ export function initSocket() {
     state.pings = serverState.pings;
     state.placedObjects = serverState.objects;
     loadMap(serverState.currentMap);
+    state.mapSelect.value = serverState.currentMap;
     draw();
   });
 
@@ -109,6 +110,7 @@ export function initSocket() {
     state.penPaths = [];
     state.pings = [];
     loadMap(mapName);
+    state.mapSelect.value = mapName;
     draw();
   });
 
