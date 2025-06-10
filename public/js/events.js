@@ -428,6 +428,7 @@ function setupContextMenu() {
     if (selectToolButton) selectToolButton.classList.add('active');
     state.currentTool = 'select';
     updateCursor();
+    updateCollapsedUI();
     customMenu.style.display = 'none';
   });
 
@@ -437,6 +438,7 @@ function setupContextMenu() {
     if (panToolButton) panToolButton.classList.add('active');
     state.currentTool = 'pan';
     updateCursor();
+    updateCollapsedUI();
     customMenu.style.display = 'none';
   });
 
@@ -446,6 +448,7 @@ function setupContextMenu() {
     if (penToolButton) penToolButton.classList.add('active');
     state.currentTool = 'pen';
     updateCursor();
+    updateCollapsedUI();
     customMenu.style.display = 'none';
   });
 }
