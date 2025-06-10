@@ -287,6 +287,7 @@ export function setupEvents() {
   state.resetViewButton.addEventListener('click', centerMap);
 
   document.getElementById('reset-all-button').addEventListener('click', () => {
+    socket.emit('clearMap');
     resetState();
     centerMap();
     draw();

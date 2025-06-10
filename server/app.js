@@ -63,6 +63,20 @@ function saveState() {
     }
 }
 
+function refreshState() {
+    const data = loadState();
+    state.drawings = data.drawings;
+    state.pings = data.pings;
+    state.objects = data.objects;
+    state.currentMap = data.currentMap;
+}
+
+function clearBoard() {
+    state.drawings = [];
+    state.pings = [];
+    state.objects = [];
+}
+
 function pushLimited(arr, item) {
     arr.push(item);
     if (arr.length > MAX_ITEMS) {
@@ -158,6 +172,7 @@ io.on('connection', (socket) => {
     });
 
     // Send the current state to the new client
+    refreshState();
     socket.emit('stateUpdate', state);
 
     // Handle drawing events
@@ -191,6 +206,14 @@ io.on('connection', (socket) => {
         state.pings = [];
         state.objects = [];
         io.emit('mapChanged', mapName); // Broadcast to all clients
+        saveState();
+    });
+
+    // Handle map clear events
+    socket.on('clearMap', () => {
+        clearBoard();
+        io.emit('mapCleared'); // Broadcast to all clients
+        io.emit('stateUpdate', state);
         saveState();
     });
 
