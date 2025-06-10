@@ -3,6 +3,41 @@ import { resizeCanvas, centerMap, draw, loadMap, updateCursor } from './canvas.j
 import { socket, requestColorChange } from './socketHandlers.js';
 
 const deleteButton = document.getElementById('delete-objects-button');
+const sidePanel = document.getElementById('side-panel');
+const collapseButton = document.getElementById('collapse-button');
+
+function updateCollapseButton() {
+  if (!collapseButton) return;
+  if (sidePanel.classList.contains('collapsed')) {
+    collapseButton.textContent = '<<';
+    collapseButton.title = 'expand';
+  } else {
+    collapseButton.textContent = '>>';
+    collapseButton.title = 'collapse';
+  }
+}
+
+export function updateCollapsedUI() {
+  const colorBox = document.getElementById('current-color');
+  const toolBtn = document.getElementById('current-tool');
+  if (colorBox) colorBox.style.backgroundColor = state.currentColor || '#ff0000';
+  if (toolBtn) {
+    const selected = document.querySelector('.tool-button.active');
+    toolBtn.textContent = selected ? selected.textContent : '';
+  }
+}
+window.updateCollapsedUI = updateCollapsedUI;
+
+function checkAutoCollapse() {
+  if (window.innerWidth < window.screen.width / 2) {
+    sidePanel.classList.add('collapsed');
+  } else {
+    sidePanel.classList.remove('collapsed');
+  }
+  resizeCanvas();
+  updateCollapseButton();
+  updateCollapsedUI();
+}
 
 function updateDeleteButtonVisibility() {
   if (!deleteButton) return;
@@ -144,6 +179,10 @@ function handlePointerDown(e) {
     return;
   }
 
+  if (state.currentTool === 'text' && e.button === 0) {
+    openTextEditor(x, y);
+    return;
+  }
 
   if (state.currentTool === 'ping' && e.button === 0) {
     const ping = { x, y, start: Date.now(), ripples: 5, color: state.currentColor || '#ff0000', solid: true };
@@ -337,6 +376,7 @@ function placeDraggedObject(e) {
   socket.emit('placeObject', data);
   state.draggedSymbol = null;
   updateCursor();
+  updateCollapsedUI();
   draw();
 }
 
@@ -411,9 +451,13 @@ function setupContextMenu() {
 }
 
 export function setupEvents() {
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    checkAutoCollapse();
+  });
 
   resizeCanvas();
+  checkAutoCollapse();
   loadMap(state.mapSelect.value);
   const redSwatch = document.querySelector('[data-color="#ff0000"]');
   if (redSwatch) {
@@ -472,8 +516,19 @@ export function setupEvents() {
   state.canvas.addEventListener('click', handleCanvasClick);
   state.canvas.addEventListener('dblclick', handleDoubleClick);
 
+  if (collapseButton) {
+    collapseButton.addEventListener('click', () => {
+      sidePanel.classList.toggle('collapsed');
+      updateCollapseButton();
+      resizeCanvas();
+      updateCollapsedUI();
+    });
+  }
+
 
   state.resetViewButton.addEventListener('click', centerMap);
+  const miniCenter = document.getElementById('reset-view-mini');
+  if (miniCenter) miniCenter.addEventListener('click', centerMap);
 
   document.getElementById('reset-all-button').addEventListener('click', () => {
     socket.emit('clearMap');
@@ -482,6 +537,16 @@ export function setupEvents() {
     draw();
     updateDeleteButtonVisibility();
   });
+  const miniClear = document.getElementById('reset-all-mini');
+  if (miniClear) {
+    miniClear.addEventListener('click', () => {
+      socket.emit('clearMap');
+      clearBoardState();
+      centerMap();
+      draw();
+      updateDeleteButtonVisibility();
+    });
+  }
 
   document.querySelectorAll('.draggable-button').forEach(button => {
     button.addEventListener('pointerdown', (e) => {
@@ -493,6 +558,7 @@ export function setupEvents() {
       e.preventDefault();
       state.draggedSymbol = button.dataset.symbol;
       updateCursor();
+      updateCollapsedUI();
     });
   });
 
@@ -526,6 +592,7 @@ export function setupEvents() {
         state.currentTool = null;
       }
       updateCursor();
+      updateCollapsedUI();
     });
   });
 

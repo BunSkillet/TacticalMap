@@ -12,6 +12,7 @@
       <canvas id="mapCanvas"></canvas>
     </div>
     <div id="side-panel">
+      <button id="collapse-button" title="Collapse">&gt;&gt;</button>
       <label for="map-select"><strong>Choose Map:</strong></label>
       <select id="map-select">
         <!-- Ensure map names match the files in the /maps/ directory -->
@@ -26,6 +27,12 @@
       <div class="map-button-row">
         <button id="reset-view-button" class="map-button">Center Map</button>
         <button id="reset-all-button" class="map-button">Clear Map</button>
+      </div>
+      <div id="collapsed-elements">
+        <div id="current-color" title="Selected Colour"></div>
+        <button id="current-tool" class="tool-button" title="Selected Tool"></button>
+        <button id="reset-view-mini" class="map-button" title="Center Map">🎯</button>
+        <button id="reset-all-mini" class="map-button" title="Clear Map">🗑️</button>
       </div>
       <h3>Colours</h3>
       <div class="color-picker-container">
