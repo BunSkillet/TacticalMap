@@ -57,7 +57,12 @@ tacticalMap
    ```bash
    npm start
    ```
-4. Open `https://localhost:3000` in your browser. If SSL certificates are not configured the server falls back to HTTP on the same port.
+4. Open `https://localhost:3000` in your browser. If you have deployed the server
+   to a domain such as `https://tacmap.xyz`, open that URL instead. When SSL
+   certificates are not configured the server falls back to HTTP on the same
+   port. **Do not open `landing.html` directly from the file system** – the
+   server enforces a Content Security Policy and must serve the pages so their
+   scripts load correctly.
 
 ### Hosting Rooms
 Create a new board by sending a `POST` request to `/host`. The response contains
@@ -65,10 +70,14 @@ a `code` that other clients can use to join. Open `board.html?room=<code>` to
 connect to that room and share the board state.
 
 ### Environment Variables
--Set the following variables in a `.env` file or your environment:
-- `ALLOWED_ORIGIN` – Allowed CORS origin (`http://tacmap.xyz` by default).
+Set the following variables in a `.env` file or your environment:
+- `ALLOWED_ORIGIN` – Allowed CORS origin (`https://tacmap.xyz` by default or
+  your own domain).
 - `AUTH_TOKEN` – Require clients to provide this token when connecting.
 - `SSL_KEY_PATH` and `SSL_CERT_PATH` – Enable HTTPS by providing paths to a certificate and key.
+
+The server uses Helmet to set a strict Content Security Policy. Keep all client
+scripts in separate files so they load correctly under this policy.
 
 Store the auth token on the client with:
 ```javascript
