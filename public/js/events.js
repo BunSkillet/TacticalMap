@@ -136,6 +136,23 @@ function handleWheel(e) {
   draw();
 }
 
+function handleDoubleClick(e) {
+  const rect = state.canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left - state.offsetX) / state.scale;
+  const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+  const ping = {
+    x,
+    y,
+    start: Date.now(),
+    ripples: 5,
+    color: state.currentColor || '#ff0000',
+    solid: true
+  };
+  state.pings.push(ping);
+  socket.emit('ping', ping);
+  draw();
+}
+
 
 function placeDraggedObject(e) {
   if (!state.draggedSymbol) return;
@@ -146,6 +163,7 @@ function placeDraggedObject(e) {
   state.placedObjects.push(data);
   socket.emit('placeObject', data);
   state.draggedSymbol = null;
+  updateCursor();
   draw();
 }
 
@@ -263,6 +281,7 @@ export function setupEvents() {
   state.canvas.addEventListener('mouseup', handleMouseUp);
   state.canvas.addEventListener('mousemove', handleMouseMove);
   state.canvas.addEventListener('pointerup', placeDraggedObject);
+  state.canvas.addEventListener('dblclick', handleDoubleClick);
 
 
   state.resetViewButton.addEventListener('click', centerMap);
@@ -274,13 +293,18 @@ export function setupEvents() {
   });
 
   document.querySelectorAll('.draggable-button').forEach(button => {
-    button.addEventListener('pointerdown', () => {
+    button.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
       state.draggedSymbol = button.dataset.symbol;
+      updateCursor();
     });
   });
 
   document.addEventListener('pointerup', () => {
-    state.draggedSymbol = null;
+    if (state.draggedSymbol) {
+      state.draggedSymbol = null;
+      updateCursor();
+    }
   });
 
   document.querySelectorAll('.tool-button').forEach(btn => {
