@@ -10,11 +10,13 @@ tacticalMap
 │   ├── board.html        # Board interface
 │   ├── landing.html      # Landing screen
 │   ├── css
-│   │   └── style.css     # Styles for the web interface
+│   │   ├── style.css     # Board page styles
+│   │   └── landing.css   # Landing page styles
 │   ├── js
 │   │   ├── main.js       # Client bootstrap
 │   │   ├── canvas.js     # Canvas rendering and animation
 │   │   ├── events.js     # DOM and input handlers
+│   │   ├── landing.js    # Landing page behavior
 │   │   ├── socketHandlers.js # Socket.IO client logic
 │   │   └── state.js      # Client side state container
 │   └── maps              # Map images used by the board
@@ -25,6 +27,7 @@ tacticalMap
 │   └── userManager.test.js
 ├── ecosystem.config.js   # pm2 configuration
 ├── webhook.js            # Simple GitHub webhook for deployments
+├── .env                 # Example environment variables
 ├── package.json          # npm configuration and scripts
 └── README.md             # Project documentation
 ```
@@ -53,11 +56,11 @@ tacticalMap
    ```bash
    npm test
    ```
-3. Start the development server:
+3. Start the server (use `npm run dev` for live reloads):
    ```bash
    npm start
    ```
-4. Open `https://localhost:3000` in your browser. If you have deployed the server
+4. Visit `http://localhost:3000/` in your browser. If you have deployed the server
    to a domain such as `https://tacmap.xyz`, open that URL instead. When SSL
    certificates are not configured the server falls back to HTTP on the same
    port. **Do not open `landing.html` directly from the file system** – the
