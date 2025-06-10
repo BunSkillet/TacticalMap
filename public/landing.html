@@ -29,10 +29,17 @@
     function getName() {
       return nameInput.value.trim();
     }
-    document.getElementById('host-btn').addEventListener('click', () => {
+    document.getElementById('host-btn').addEventListener('click', async () => {
       const name = getName();
       if (!name) return alert('Please enter your name');
-      window.location.href = `board.html?name=${encodeURIComponent(name)}&host=1`;
+      try {
+        const resp = await fetch('/host', { method: 'POST' });
+        const data = await resp.json();
+        const code = encodeURIComponent(data.code);
+        window.location.href = `board.html?name=${encodeURIComponent(name)}&room=${code}&host=1`;
+      } catch (err) {
+        alert('Failed to create room');
+      }
     });
     document.getElementById('join-btn').addEventListener('click', () => {
       const name = getName();
