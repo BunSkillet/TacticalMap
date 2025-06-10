@@ -190,7 +190,7 @@ io.on('connection', (socket) => {
     socket.on('draw', (data) => {
         if (!isValidDraw(data) || rateLimited(socket.id, 'draw')) return;
         pushLimited(state.drawings, data);
-        io.emit('draw', data); // Broadcast to all clients
+        socket.broadcast.emit('draw', data); // Broadcast to other clients
         saveState();
     });
 
@@ -198,7 +198,7 @@ io.on('connection', (socket) => {
     socket.on('ping', (data) => {
         if (!isValidPing(data) || rateLimited(socket.id, 'ping')) return;
         pushLimited(state.pings, data);
-        io.emit('ping', data); // Broadcast to all clients
+        socket.broadcast.emit('ping', data); // Broadcast to other clients
         saveState();
     });
 
@@ -206,7 +206,7 @@ io.on('connection', (socket) => {
     socket.on('placeObject', (data) => {
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
         pushLimited(state.objects, data);
-        io.emit('placeObject', data); // Broadcast to all clients
+        socket.broadcast.emit('placeObject', data); // Broadcast to other clients
         saveState();
     });
 
@@ -219,7 +219,7 @@ io.on('connection', (socket) => {
                 state.objects[u.index].y = u.y;
             }
         });
-        io.emit('moveObjects', updates);
+        socket.broadcast.emit('moveObjects', updates);
         saveState();
     });
 
@@ -232,7 +232,7 @@ io.on('connection', (socket) => {
                 state.objects.splice(i, 1);
             }
         });
-        io.emit('removeObjects', toRemove);
+        socket.broadcast.emit('removeObjects', toRemove);
         saveState();
     });
 
