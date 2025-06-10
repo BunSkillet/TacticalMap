@@ -1,8 +1,8 @@
 const users = [];
-const colorsInUse = {}; // Tracks which colors are in use (except red)
+const colorsInUse = {}; // Tracks which colors are in use (except #ff0000)
 
 function addUser(socketId) {
-    const user = { id: socketId, color: 'red' };
+    const user = { id: socketId, color: '#ff0000' };
     users.push(user);
     return user;
 }
@@ -11,7 +11,7 @@ function removeUser(socketId) {
     const userIndex = users.findIndex(u => u.id === socketId);
     if (userIndex !== -1) {
         const user = users[userIndex];
-        if (user.color !== 'red') {
+        if (user.color !== '#ff0000') {
             delete colorsInUse[user.color];
         }
         users.splice(userIndex, 1);
@@ -33,15 +33,15 @@ function changeUserColor(socketId, newColor) {
         return { success: true, color: desired };
     }
 
-    if (desired === 'red' || !colorsInUse[desired]) {
-        // Free the user's current color if it's not red
-        if (user.color !== 'red') {
+    if (desired === '#ff0000' || !colorsInUse[desired]) {
+        // Free the user's current color if it's not #ff0000
+        if (user.color !== '#ff0000') {
             delete colorsInUse[user.color];
         }
 
         // Assign the new color
         user.color = desired;
-        if (desired !== 'red') {
+        if (desired !== '#ff0000') {
             colorsInUse[desired] = socketId;
         }
 
