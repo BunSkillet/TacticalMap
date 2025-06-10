@@ -106,7 +106,8 @@ html, body {
 }
 
 #reset-view-mini,
-#reset-all-mini {
+#reset-all-mini,
+#save-image-mini {
   width: 40px;
   height: 40px;
   font-size: 14px;
