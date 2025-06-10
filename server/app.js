@@ -33,10 +33,10 @@ const RATE_LIMITS = {
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
 // Store active rooms and their states
-const rooms = new Map(); // code -> {drawings, pings, objects, currentMap}
+const rooms = new Map(); // code -> {drawings, pings, objects, currentMap, history, redo}
 
 function createRoomState() {
-    return { drawings: [], pings: [], objects: [], currentMap: 'train' };
+    return { drawings: [], pings: [], objects: [], currentMap: 'train', history: [], redo: [] };
 }
 
 function generateRoomCode() {
@@ -97,6 +97,16 @@ function pushLimited(arr, item) {
     if (arr.length > MAX_ITEMS) {
         arr.shift();
     }
+}
+
+const MAX_HISTORY = 100;
+
+function recordAction(state, action) {
+    if (!state.history) state.history = [];
+    if (!state.redo) state.redo = [];
+    state.history.push(action);
+    if (state.history.length > MAX_HISTORY) state.history.shift();
+    state.redo = [];
 }
 
 function emitUserList(room) {
@@ -243,6 +253,7 @@ io.on('connection', (socket) => {
     socket.on('draw', (data) => {
         if (!isValidDraw(data) || rateLimited(socket.id, 'draw')) return;
         pushLimited(roomState.drawings, data);
+        recordAction(roomState, { type: 'draw', data });
         socket.to(roomCode).emit('draw', data);
     });
 
@@ -257,6 +268,7 @@ io.on('connection', (socket) => {
     socket.on('placeObject', (data) => {
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
         pushLimited(roomState.objects, data);
+        recordAction(roomState, { type: 'placeObject', data });
         socket.to(roomCode).emit('placeObject', data);
     });
 
@@ -286,11 +298,14 @@ io.on('connection', (socket) => {
     socket.on('removeObjects', (indices) => {
         if (!isValidRemoveList(indices)) return;
         const toRemove = [...indices].sort((a, b) => b - a);
+        const removed = [];
         toRemove.forEach(i => {
             if (i >= 0 && i < roomState.objects.length) {
+                removed.push({ index: i, object: roomState.objects[i] });
                 roomState.objects.splice(i, 1);
             }
         });
+        if (removed.length > 0) recordAction(roomState, { type: 'removeObjects', removed });
         socket.to(roomCode).emit('removeObjects', toRemove);
     });
 
@@ -305,8 +320,70 @@ io.on('connection', (socket) => {
 
     // Handle map clear events
     socket.on('clearMap', () => {
+        recordAction(roomState, {
+            type: 'clearMap',
+            prev: {
+                drawings: [...roomState.drawings],
+                pings: [...roomState.pings],
+                objects: [...roomState.objects]
+            }
+        });
         clearBoard(roomState);
         io.to(roomCode).emit('mapCleared');
+        io.to(roomCode).emit('stateUpdate', roomState);
+    });
+
+    socket.on('undo', () => {
+        const action = roomState.history.pop();
+        if (!action) return;
+        roomState.redo.push(action);
+        switch (action.type) {
+            case 'draw':
+                if (roomState.drawings.length > 0) roomState.drawings.pop();
+                break;
+            case 'placeObject':
+                if (roomState.objects.length > 0) roomState.objects.pop();
+                break;
+            case 'removeObjects':
+                action.removed.slice().sort((a,b) => a.index - b.index).forEach(({ index, object }) => {
+                    roomState.objects.splice(index, 0, object);
+                });
+                break;
+            case 'clearMap':
+                roomState.drawings = action.prev.drawings;
+                roomState.pings = action.prev.pings;
+                roomState.objects = action.prev.objects;
+                break;
+            default:
+                break;
+        }
+        io.to(roomCode).emit('stateUpdate', roomState);
+    });
+
+    socket.on('redo', () => {
+        const action = roomState.redo.pop();
+        if (!action) return;
+        roomState.history.push(action);
+        switch (action.type) {
+            case 'draw':
+                pushLimited(roomState.drawings, action.data);
+                break;
+            case 'placeObject':
+                pushLimited(roomState.objects, action.data);
+                break;
+            case 'removeObjects':
+                action.removed.map(r => r.index).sort((a,b) => b - a).forEach(i => {
+                    if (i >= 0 && i < roomState.objects.length) {
+                        roomState.objects.splice(i, 1);
+                    }
+                });
+                break;
+            case 'clearMap':
+                clearBoard(roomState);
+                break;
+            default:
+                break;
+        }
         io.to(roomCode).emit('stateUpdate', roomState);
     });
 

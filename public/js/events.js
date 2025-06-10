@@ -5,6 +5,10 @@ import { socket, requestColorChange } from './socketHandlers.js';
 const deleteButton = document.getElementById('delete-objects-button');
 const sidePanel = document.getElementById('side-panel');
 const collapseButton = document.getElementById('collapse-button');
+const undoButton = document.getElementById('undo-button');
+const redoButton = document.getElementById('redo-button');
+const undoMini = document.getElementById('undo-mini');
+const redoMini = document.getElementById('redo-mini');
 
 function updateCollapseButton() {
   if (!collapseButton) return;
@@ -486,6 +490,13 @@ export function setupEvents() {
       draw();
       updateDeleteButtonVisibility();
     }
+    if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      socket.emit('undo');
+    } else if (e.ctrlKey && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
+      e.preventDefault();
+      socket.emit('redo');
+    }
     if (e.key === 'Control' && !state.isDragging) {
       state.canvas.style.cursor = 'grab';
     }
@@ -532,6 +543,11 @@ export function setupEvents() {
   state.resetViewButton.addEventListener('click', centerMap);
   const miniCenter = document.getElementById('reset-view-mini');
   if (miniCenter) miniCenter.addEventListener('click', centerMap);
+
+  if (undoButton) undoButton.addEventListener('click', () => socket.emit('undo'));
+  if (redoButton) redoButton.addEventListener('click', () => socket.emit('redo'));
+  if (undoMini) undoMini.addEventListener('click', () => socket.emit('undo'));
+  if (redoMini) redoMini.addEventListener('click', () => socket.emit('redo'));
 
   document.getElementById('reset-all-button').addEventListener('click', () => {
     socket.emit('clearMap');

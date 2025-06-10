@@ -40,6 +40,7 @@ tacticalMap
 - **Object Selection** – Select placed objects to move or delete them. A Delete button allows removal on mobile devices.
 - **Pan and Zoom** – Scroll to zoom and drag to pan the map.
 - **Context Menu** – Right click the canvas to quickly switch tools.
+- **Undo/Redo** – Revert the last change or reapply it using toolbar buttons or keyboard shortcuts.
 - **Real‑Time Collaboration** – All drawings, pings and objects are synced between connected clients.
 - **User Colour Management** – The server assigns each user a unique colour and prevents conflicts.
 - **Multi-Room Support** – Each board has an isolated state identified by a unique 4‑digit code returned from the `/host` endpoint.
