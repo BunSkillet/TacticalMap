@@ -58,6 +58,7 @@ export function initSocket() {
     const swatch = document.querySelector(`[data-color="${color}"]`);
     if (swatch) swatch.classList.add('active');
     draw();
+    if (window.updateCollapsedUI) window.updateCollapsedUI();
   });
 
   socket.on('colorUnavailable', (color) => {
