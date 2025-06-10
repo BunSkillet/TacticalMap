@@ -2,10 +2,35 @@ import { state, clearBoardState } from './state.js';
 import { resizeCanvas, centerMap, draw, loadMap, updateCursor } from './canvas.js';
 import { socket, requestColorChange } from './socketHandlers.js';
 
-function handleMouseDown(e) {
+function handlePointerDown(e) {
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+
+  state.activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+
+  if (state.activePointers.size === 2 && e.pointerType === 'touch') {
+    const pts = Array.from(state.activePointers.values());
+    state.isPinching = true;
+    state.initialPinchDistance = Math.hypot(
+      pts[1].clientX - pts[0].clientX,
+      pts[1].clientY - pts[0].clientY
+    );
+    state.initialScale = state.scale;
+    const midpoint = {
+      x: (pts[0].clientX + pts[1].clientX) / 2,
+      y: (pts[0].clientY + pts[1].clientY) / 2
+    };
+    state.initialWorldCenter = {
+      x: (midpoint.x - rect.left - state.offsetX) / state.scale,
+      y: (midpoint.y - rect.top - state.offsetY) / state.scale
+    };
+    state.isDragging = false;
+    state.isDrawing = false;
+    state.isLiveDrawing = false;
+    state.selectionRect = null;
+    return;
+  }
 
   if (e.button === 0 && (e.ctrlKey || state.currentTool === 'pan')) {
     state.isDragging = true;
@@ -45,7 +70,16 @@ function handleMouseDown(e) {
   }
 }
 
-function handleMouseUp(e) {
+function handlePointerUp(e) {
+  state.activePointers.delete(e.pointerId);
+
+  if (state.isPinching) {
+    if (state.activePointers.size < 2) {
+      state.isPinching = false;
+    }
+    return;
+  }
+
   if (state.currentTool === 'select' && state.selectionRect) {
     const x1 = Math.min(state.selectionRect.startX, state.selectionRect.endX);
     const x2 = Math.max(state.selectionRect.startX, state.selectionRect.endX);
@@ -81,8 +115,31 @@ function handleMouseUp(e) {
   }
 }
 
-function handleMouseMove(e) {
+function handlePointerMove(e) {
   const rect = state.canvas.getBoundingClientRect();
+
+  if (state.isPinching && state.activePointers.has(e.pointerId)) {
+    state.activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+    const pts = Array.from(state.activePointers.values());
+    if (pts.length >= 2) {
+      const newDistance = Math.hypot(
+        pts[1].clientX - pts[0].clientX,
+        pts[1].clientY - pts[0].clientY
+      );
+      const ratio = newDistance / state.initialPinchDistance;
+      const midpoint = {
+        x: (pts[0].clientX + pts[1].clientX) / 2,
+        y: (pts[0].clientY + pts[1].clientY) / 2
+      };
+      const newScale = state.initialScale * ratio;
+      state.scale = newScale;
+      state.offsetX = midpoint.x - rect.left - state.initialWorldCenter.x * newScale;
+      state.offsetY = midpoint.y - rect.top - state.initialWorldCenter.y * newScale;
+      draw();
+    }
+    return;
+  }
+
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
 
@@ -275,9 +332,10 @@ export function setupEvents() {
 
   state.canvas.addEventListener('wheel', handleWheel);
 
-  state.canvas.addEventListener('mousedown', handleMouseDown);
-  state.canvas.addEventListener('mouseup', handleMouseUp);
-  state.canvas.addEventListener('mousemove', handleMouseMove);
+  state.canvas.addEventListener('pointerdown', handlePointerDown);
+  state.canvas.addEventListener('pointerup', handlePointerUp);
+  state.canvas.addEventListener('pointercancel', handlePointerUp);
+  state.canvas.addEventListener('pointermove', handlePointerMove);
   state.canvas.addEventListener('pointerup', placeDraggedObject);
   state.canvas.addEventListener('dblclick', handleDoubleClick);
 
@@ -300,6 +358,14 @@ export function setupEvents() {
   });
 
   document.addEventListener('pointerup', () => {
+    if (state.draggedSymbol) {
+      state.draggedSymbol = null;
+      updateCursor();
+    }
+  });
+  document.addEventListener('pointercancel', () => {
+    state.activePointers.clear();
+    state.isPinching = false;
     if (state.draggedSymbol) {
       state.draggedSymbol = null;
       updateCursor();

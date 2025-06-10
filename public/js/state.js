@@ -20,7 +20,12 @@ export const state = {
   isDrawing: false,
   isLiveDrawing: false,
   pings: [],
-  draggedSymbol: null
+  draggedSymbol: null,
+  activePointers: new Map(),
+  isPinching: false,
+  initialPinchDistance: 0,
+  initialScale: 1,
+  initialWorldCenter: { x: 0, y: 0 }
 };
 
 state.ctx = state.canvas.getContext('2d');
@@ -43,6 +48,11 @@ export function resetState() {
   state.isLiveDrawing = false;
   state.pings.length = 0;
   state.draggedSymbol = null;
+  state.activePointers.clear();
+  state.isPinching = false;
+  state.initialPinchDistance = 0;
+  state.initialScale = 1;
+  state.initialWorldCenter = { x: 0, y: 0 };
 }
 
 export function clearBoardState() {
