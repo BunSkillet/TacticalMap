@@ -100,6 +100,17 @@ function isValidObject(data) {
         typeof data.x === 'number' && typeof data.y === 'number';
 }
 
+function isValidMoveList(arr) {
+    return Array.isArray(arr) && arr.every(u =>
+        typeof u.index === 'number' &&
+        typeof u.x === 'number' &&
+        typeof u.y === 'number');
+}
+
+function isValidRemoveList(arr) {
+    return Array.isArray(arr) && arr.every(i => typeof i === 'number');
+}
+
 function rateLimited(socketId, type) {
     const now = Date.now();
     if (!lastEvent.has(socketId)) {
@@ -196,6 +207,32 @@ io.on('connection', (socket) => {
         if (!isValidObject(data) || rateLimited(socket.id, 'placeObject')) return;
         pushLimited(state.objects, data);
         io.emit('placeObject', data); // Broadcast to all clients
+        saveState();
+    });
+
+    // Handle object movement events
+    socket.on('moveObjects', (updates) => {
+        if (!isValidMoveList(updates)) return;
+        updates.forEach(u => {
+            if (state.objects[u.index]) {
+                state.objects[u.index].x = u.x;
+                state.objects[u.index].y = u.y;
+            }
+        });
+        io.emit('moveObjects', updates);
+        saveState();
+    });
+
+    // Handle object removal events
+    socket.on('removeObjects', (indices) => {
+        if (!isValidRemoveList(indices)) return;
+        const toRemove = [...indices].sort((a, b) => b - a);
+        toRemove.forEach(i => {
+            if (i >= 0 && i < state.objects.length) {
+                state.objects.splice(i, 1);
+            }
+        });
+        io.emit('removeObjects', toRemove);
         saveState();
     });
 

@@ -148,6 +148,12 @@ function handlePointerMove(e) {
       state.placedObjects[i].x += e.movementX / state.scale;
       state.placedObjects[i].y += e.movementY / state.scale;
     });
+    const updates = state.selectedObjectIndices.map(i => ({
+      index: i,
+      x: state.placedObjects[i].x,
+      y: state.placedObjects[i].y
+    }));
+    socket.emit('moveObjects', updates);
     draw();
     return;
   }
@@ -315,7 +321,9 @@ export function setupEvents() {
   document.addEventListener('keydown', (e) => {
     if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedObjectIndices.length > 0) {
       e.preventDefault();
-      state.selectedObjectIndices.sort((a, b) => b - a).forEach(i => state.placedObjects.splice(i, 1));
+      const indices = state.selectedObjectIndices.slice();
+      socket.emit('removeObjects', indices);
+      indices.sort((a, b) => b - a).forEach(i => state.placedObjects.splice(i, 1));
       state.selectedObjectIndices = [];
       draw();
     }
