@@ -8,7 +8,7 @@ function reset() {
 
 function testAddAndGetUser() {
   reset();
-  const u = userManager.addUser('abc', 'Alice');
+  const u = userManager.addUser('abc', 'Alice', 'room1');
   assert.strictEqual(u.id, 'abc');
   assert.strictEqual(u.name, 'Alice');
   const fetched = userManager.getUser('abc');
@@ -19,15 +19,15 @@ function testAddAndGetUser() {
 
 function testDefaultColor() {
   reset();
-  const u = userManager.addUser('user1', 'Bob');
+  const u = userManager.addUser('user1', 'Bob', 'room1');
   assert.strictEqual(u.color, '#ff0000');
   userManager.removeUser('user1');
 }
 
 function testMultipleRed() {
   reset();
-  const u1 = userManager.addUser('u1', 'A');
-  const u2 = userManager.addUser('u2', 'B');
+  const u1 = userManager.addUser('u1', 'A', 'room1');
+  const u2 = userManager.addUser('u2', 'B', 'room1');
   // second user already has red; attempt to change color back to red explicitly
   const r = userManager.changeUserColor('u2', '#ff0000');
   assert.ok(r.success);
@@ -39,7 +39,7 @@ function testMultipleRed() {
 
 function testChangeColor() {
   reset();
-  userManager.addUser('abc', 'C');
+  userManager.addUser('abc', 'C', 'room1');
   const result = userManager.changeUserColor('abc', 'blue');
   assert.ok(result.success);
   assert.strictEqual(result.color, 'blue');
@@ -50,8 +50,8 @@ function testChangeColor() {
 
 function testUniqueColorSelection() {
   reset();
-  userManager.addUser('a', 'A');
-  userManager.addUser('b', 'B');
+  userManager.addUser('a', 'A', 'room1');
+  userManager.addUser('b', 'B', 'room1');
   const r1 = userManager.changeUserColor('a', 'green');
   assert.ok(r1.success);
   const r2 = userManager.changeUserColor('b', 'green');
@@ -60,9 +60,21 @@ function testUniqueColorSelection() {
   userManager.removeUser('b');
 }
 
+function testColorIndependenceAcrossRooms() {
+  reset();
+  userManager.addUser('r1a', 'A', 'room1');
+  userManager.addUser('r2a', 'B', 'room2');
+  const res1 = userManager.changeUserColor('r1a', 'orange');
+  const res2 = userManager.changeUserColor('r2a', 'orange');
+  assert.ok(res1.success);
+  assert.ok(res2.success); // same colour allowed in different rooms
+  userManager.removeUser('r1a');
+  userManager.removeUser('r2a');
+}
+
 function testRemoveUser() {
   reset();
-  userManager.addUser('abc', 'Z');
+  userManager.addUser('abc', 'Z', 'room1');
   const removed = userManager.removeUser('abc');
   assert.ok(removed);
   assert.strictEqual(userManager.getUser('abc'), null);
@@ -74,6 +86,7 @@ function run() {
   testMultipleRed();
   testChangeColor();
   testUniqueColorSelection();
+  testColorIndependenceAcrossRooms();
   testRemoveUser();
   console.log('All tests passed');
 }
