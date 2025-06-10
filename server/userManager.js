@@ -1,8 +1,8 @@
 const users = [];
 const colorsInUse = {}; // Tracks which colors are in use (except #ff0000)
 
-function addUser(socketId) {
-    const user = { id: socketId, color: '#ff0000' };
+function addUser(socketId, name = '') {
+    const user = { id: socketId, color: '#ff0000', name };
     users.push(user);
     return user;
 }
@@ -51,6 +51,13 @@ function changeUserColor(socketId, newColor) {
     return { success: false, reason: 'Color unavailable' };
 }
 
+function setUserName(socketId, name) {
+    const user = users.find(u => u.id === socketId);
+    if (!user) return false;
+    user.name = name;
+    return true;
+}
+
 function getUser(socketId) {
     return users.find(u => u.id === socketId) || null;
 }
@@ -63,6 +70,7 @@ module.exports = {
     addUser,
     removeUser,
     changeUserColor,
+    setUserName,
     getUser,
     getAllUsers,
 };

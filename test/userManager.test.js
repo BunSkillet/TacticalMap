@@ -8,10 +8,12 @@ function reset() {
 
 function testAddAndGetUser() {
   reset();
-  const u = userManager.addUser('abc');
+  const u = userManager.addUser('abc', 'Alice');
   assert.strictEqual(u.id, 'abc');
+  assert.strictEqual(u.name, 'Alice');
   const fetched = userManager.getUser('abc');
   assert.strictEqual(fetched.id, 'abc');
+  assert.strictEqual(fetched.name, 'Alice');
   userManager.removeUser('abc');
 }
 
@@ -66,6 +68,15 @@ function testRemoveUser() {
   assert.strictEqual(userManager.getUser('abc'), null);
 }
 
+function testSetUserName() {
+  reset();
+  userManager.addUser('id1');
+  userManager.setUserName('id1', 'Bob');
+  const user = userManager.getUser('id1');
+  assert.strictEqual(user.name, 'Bob');
+  userManager.removeUser('id1');
+}
+
 function run() {
   testAddAndGetUser();
   testDefaultColor();
@@ -73,6 +84,7 @@ function run() {
   testChangeColor();
   testUniqueColorSelection();
   testRemoveUser();
+  testSetUserName();
   console.log('All tests passed');
 }
 

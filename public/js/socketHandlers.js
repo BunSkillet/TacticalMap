@@ -1,15 +1,14 @@
 import { state } from './state.js';
 import { draw, loadMap } from './canvas.js';
 
-const token = localStorage.getItem('authToken') || '';
-export const socket = io({ auth: { token } });
+export let socket;
 
 // Helper to request a color change from the server
 export function requestColorChange(color) {
-  socket.emit('changeColor', color);
+  if (socket) socket.emit('changeColor', color);
 }
 
-export function initSocket() {
+function attachHandlers() {
   socket.on('stateUpdate', (serverState) => {
     state.penPaths = serverState.drawings;
     state.pings = serverState.pings;
@@ -87,4 +86,18 @@ export function initSocket() {
     state.pings = [];
     draw();
   });
+
+  socket.on('userConnected', (data) => {
+    console.log(`${data.name || 'Unknown'} joined`);
+  });
+
+  socket.on('userDisconnected', (data) => {
+    console.log(`${data.name || 'Unknown'} left`);
+  });
+}
+
+export function initSocket(name, room) {
+  const token = localStorage.getItem('authToken') || '';
+  socket = io({ auth: { token, name, room } });
+  attachHandlers();
 }

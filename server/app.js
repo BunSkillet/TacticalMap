@@ -172,10 +172,13 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
+    const { name = '', room = '' } = socket.handshake.auth || {};
+
     // Add the user and assign a color
-    const user = userManager.addUser(socket.id);
+    const user = userManager.addUser(socket.id, name);
+    if (room) socket.join(room);
     socket.emit('colorAssigned', user.color);
-    socket.broadcast.emit('userConnected', socket.id);
+    socket.broadcast.emit('userConnected', { id: socket.id, name });
 
     // Handle color change requests
     socket.on('changeColor', (newColor) => {
@@ -275,8 +278,8 @@ io.on('connection', (socket) => {
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
-        userManager.removeUser(socket.id);
-        socket.broadcast.emit('userDisconnected', socket.id);
+        const user = userManager.removeUser(socket.id);
+        socket.broadcast.emit('userDisconnected', { id: socket.id, name: user ? user.name : '' });
     });
 });
 
