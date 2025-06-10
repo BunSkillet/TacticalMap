@@ -15,6 +15,26 @@ function testAddAndGetUser() {
   userManager.removeUser('abc');
 }
 
+function testDefaultColor() {
+  reset();
+  const u = userManager.addUser('user1');
+  assert.strictEqual(u.color, '#ff0000');
+  userManager.removeUser('user1');
+}
+
+function testMultipleRed() {
+  reset();
+  const u1 = userManager.addUser('u1');
+  const u2 = userManager.addUser('u2');
+  // second user already has red; attempt to change color back to red explicitly
+  const r = userManager.changeUserColor('u2', '#ff0000');
+  assert.ok(r.success);
+  assert.strictEqual(userManager.getUser('u1').color, '#ff0000');
+  assert.strictEqual(userManager.getUser('u2').color, '#ff0000');
+  userManager.removeUser('u1');
+  userManager.removeUser('u2');
+}
+
 function testChangeColor() {
   reset();
   userManager.addUser('abc');
@@ -48,6 +68,8 @@ function testRemoveUser() {
 
 function run() {
   testAddAndGetUser();
+  testDefaultColor();
+  testMultipleRed();
   testChangeColor();
   testUniqueColorSelection();
   testRemoveUser();
