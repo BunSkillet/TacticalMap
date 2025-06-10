@@ -25,19 +25,27 @@ function changeUserColor(socketId, newColor) {
 
     if (!user) return { success: false, reason: 'User not found' };
 
-    if (newColor === 'red' || !colorsInUse[newColor]) {
+    // Normalize color string
+    const desired = typeof newColor === 'string' ? newColor.toLowerCase() : newColor;
+
+    // If the user is requesting the color they already have, allow it
+    if (desired === user.color) {
+        return { success: true, color: desired };
+    }
+
+    if (desired === 'red' || !colorsInUse[desired]) {
         // Free the user's current color if it's not red
         if (user.color !== 'red') {
             delete colorsInUse[user.color];
         }
 
         // Assign the new color
-        user.color = newColor;
-        if (newColor !== 'red') {
-            colorsInUse[newColor] = socketId;
+        user.color = desired;
+        if (desired !== 'red') {
+            colorsInUse[desired] = socketId;
         }
 
-        return { success: true, color: newColor };
+        return { success: true, color: desired };
     }
 
     return { success: false, reason: 'Color unavailable' };

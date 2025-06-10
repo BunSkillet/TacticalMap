@@ -26,6 +26,18 @@ function testChangeColor() {
   userManager.removeUser('abc');
 }
 
+function testUniqueColorSelection() {
+  reset();
+  userManager.addUser('a');
+  userManager.addUser('b');
+  const r1 = userManager.changeUserColor('a', 'green');
+  assert.ok(r1.success);
+  const r2 = userManager.changeUserColor('b', 'green');
+  assert.ok(!r2.success);
+  userManager.removeUser('a');
+  userManager.removeUser('b');
+}
+
 function testRemoveUser() {
   reset();
   userManager.addUser('abc');
@@ -37,6 +49,7 @@ function testRemoveUser() {
 function run() {
   testAddAndGetUser();
   testChangeColor();
+  testUniqueColorSelection();
   testRemoveUser();
   console.log('All tests passed');
 }
