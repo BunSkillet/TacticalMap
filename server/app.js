@@ -1,8 +1,3 @@
-try {
-    require('dotenv').config();
-} catch (err) {
-    console.warn('dotenv not installed, skipping .env load');
-}
 const express = require('express');
 const http = require('http');
 const https = require('https');
@@ -22,6 +17,16 @@ const RATE_LIMITS = {
     ping: 1000, // ms between ping events
     placeObject: 200, // ms between object placements
 };
+
+const dotenv = require('dotenv');
+const envPath = path.join(__dirname, '..', '.env');
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.warn('Warning: .env file not found or invalid');
+} else {
+  console.log('Environment variables loaded from .env');
+}
 
 const lastEvent = new Map(); // socket.id -> {eventType: timestamp}
 
