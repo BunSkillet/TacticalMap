@@ -9,10 +9,82 @@ function updateDeleteButtonVisibility() {
   deleteButton.style.display = state.selectedObjectIndices.length > 0 ? 'block' : 'none';
 }
 
+function closeTextEditor(save) {
+  if (!state.activeTextInput) return;
+  const input = state.activeTextInput;
+  const index = state.editingObjectIndex;
+  const text = input.value.trim();
+  const x = (parseFloat(input.style.left) - state.offsetX) / state.scale;
+  const y = (parseFloat(input.style.top) - state.offsetY) / state.scale;
+  input.remove();
+  state.activeTextInput = null;
+  state.editingObjectIndex = null;
+  if (save && text) {
+    if (index !== null) {
+      state.placedObjects[index].symbol = text;
+      state.placedObjects[index].type = 'text';
+      socket.emit('editObject', { index, symbol: text, type: 'text' });
+    } else {
+      const data = { symbol: text, x, y, type: 'text' };
+      state.placedObjects.push(data);
+      socket.emit('placeObject', data);
+    }
+  } else if (index !== null && !text) {
+    socket.emit('removeObjects', [index]);
+    state.placedObjects.splice(index, 1);
+  }
+  draw();
+  updateDeleteButtonVisibility();
+}
+
+function openTextEditor(x, y, index = null) {
+  const container = document.getElementById('canvas-container');
+  closeTextEditor(false);
+  const input = document.createElement('textarea');
+  input.className = 'text-editor';
+  if (index !== null) input.value = state.placedObjects[index].symbol;
+  input.style.left = `${state.offsetX + x * state.scale}px`;
+  input.style.top = `${state.offsetY + y * state.scale}px`;
+  container.appendChild(input);
+  input.focus();
+  state.activeTextInput = input;
+  state.editingObjectIndex = index;
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      closeTextEditor(true);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeTextEditor(false);
+    }
+  });
+  input.addEventListener('blur', () => closeTextEditor(true));
+}
+
 function handlePointerDown(e) {
   if (state.draggedSymbol) {
     // When an object icon is selected, ignore tool interactions
     return;
+  }
+  if (e.pointerType === 'touch') {
+    const now = Date.now();
+    if (now - state.lastTapTime < 300) {
+      const rect = state.canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left - state.offsetX) / state.scale;
+      const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+      const idx = state.placedObjects.findIndex(obj => {
+        const dx = x - obj.x;
+        const dy = y - obj.y;
+        return Math.sqrt(dx * dx + dy * dy) < 20 / state.scale && obj.type === 'text';
+      });
+      if (idx !== -1) {
+        e.preventDefault();
+        openTextEditor(state.placedObjects[idx].x, state.placedObjects[idx].y, idx);
+        state.lastTapTime = 0;
+        return;
+      }
+    }
+    state.lastTapTime = now;
   }
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
@@ -71,6 +143,7 @@ function handlePointerDown(e) {
     state.penPath = [{ x, y }];
     return;
   }
+
 
   if (state.currentTool === 'ping' && e.button === 0) {
     const ping = { x, y, start: Date.now(), ripples: 5, color: state.currentColor || '#ff0000', solid: true };
@@ -205,6 +278,14 @@ function handlePointerMove(e) {
   updateCursor();
 }
 
+function handleCanvasClick(e) {
+  if (state.currentTool !== 'text' || state.activeTextInput) return;
+  const rect = state.canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left - state.offsetX) / state.scale;
+  const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+  openTextEditor(x, y);
+}
+
 function handleWheel(e) {
   e.preventDefault();
   const rect = state.canvas.getBoundingClientRect();
@@ -223,6 +304,15 @@ function handleDoubleClick(e) {
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
+  const idx = state.placedObjects.findIndex(obj => {
+    const dx = x - obj.x;
+    const dy = y - obj.y;
+    return Math.sqrt(dx * dx + dy * dy) < 20 / state.scale && obj.type === 'text';
+  });
+  if (idx !== -1) {
+    openTextEditor(state.placedObjects[idx].x, state.placedObjects[idx].y, idx);
+    return;
+  }
   const ping = {
     x,
     y,
@@ -242,7 +332,7 @@ function placeDraggedObject(e) {
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
-  const data = { symbol: state.draggedSymbol, x, y };
+  const data = { symbol: state.draggedSymbol, x, y, type: 'symbol' };
   state.placedObjects.push(data);
   socket.emit('placeObject', data);
   state.draggedSymbol = null;
@@ -379,6 +469,7 @@ export function setupEvents() {
   state.canvas.addEventListener('pointercancel', handlePointerUp);
   state.canvas.addEventListener('pointermove', handlePointerMove);
   state.canvas.addEventListener('pointerup', placeDraggedObject);
+  state.canvas.addEventListener('click', handleCanvasClick);
   state.canvas.addEventListener('dblclick', handleDoubleClick);
 
 
