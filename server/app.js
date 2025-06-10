@@ -307,6 +307,7 @@ io.on('connection', (socket) => {
         const removed = userManager.removeUser(socket.id);
         const name = removed ? removed.name : '';
         socket.broadcast.to(roomCode).emit('userDisconnected', { id: socket.id, name });
+        lastEvent.delete(socket.id);
     });
 });
 
