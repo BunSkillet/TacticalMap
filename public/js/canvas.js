@@ -136,8 +136,11 @@ export function updateCursor() {
     )}`;
     cursor = `url('${svgCursor}') 12 12, auto`;
   }
+  // Apply the calculated cursor only to the canvas. The sidebar and the rest
+  // of the page should keep the default cursor so that elements such as the
+  // draggable buttons can define their own cursor behaviour.
   state.canvas.style.cursor = cursor;
-  document.body.style.cursor = cursor;
+  document.body.style.cursor = 'default';
 }
 
 export function animate() {
