@@ -206,7 +206,7 @@ io.on('connection', (socket) => {
     const roomState = rooms.get(roomCode);
 
     // Add the user and assign a color
-    const user = userManager.addUser(socket.id, userName);
+    const user = userManager.addUser(socket.id, userName, roomCode);
     socket.emit('colorAssigned', user.color);
     socket.broadcast.to(roomCode).emit('userConnected', { id: socket.id, name: userName });
 
