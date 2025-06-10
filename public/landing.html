@@ -8,8 +8,21 @@
 </head>
 <body class="landing">
   <header id="button-container">
-    <button id="host-btn" class="action-btn">Host</button>
-    <button id="join-btn" class="action-btn">Join</button>
+    <div class="btn-wrapper">
+      <button id="host-btn" class="action-btn">Host</button>
+      <div id="host-form" class="form-container">
+        <input id="host-username" placeholder="Username" autocomplete="off">
+        <button id="host-confirm" class="form-btn">Start</button>
+      </div>
+    </div>
+    <div class="btn-wrapper">
+      <button id="join-btn" class="action-btn">Join</button>
+      <div id="join-form" class="form-container">
+        <input id="join-username" placeholder="Username" autocomplete="off">
+        <input id="join-code" placeholder="Room Code" autocomplete="off">
+        <button id="join-confirm" class="form-btn">Enter</button>
+      </div>
+    </div>
   </header>
 
   <section id="description">

@@ -15,6 +15,7 @@ body.landing {
   background-color: #1a1a1a;
   z-index: 1000;
   transition: padding 0.3s;
+  overflow: visible;
 }
 
 #button-container.scrolled {
@@ -29,7 +30,11 @@ body.landing {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.action-btn.active {
+  background-color: #111;
 }
 
 #button-container.scrolled .action-btn {
@@ -44,4 +49,50 @@ section {
 
 section a {
   color: #4ea0ff;
+}
+
+.btn-wrapper {
+  position: relative;
+}
+
+.form-container {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-color: #1a1a1a;
+  padding: 0.5rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2000;
+}
+
+.form-container.show {
+  display: flex;
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.form-container input {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #222;
+  color: #fff;
+}
+
+.form-btn {
+  padding: 0.5rem;
+  background-color: #555;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translate(-50%, -10%); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
