@@ -1,6 +1,6 @@
 import { state, resetState } from './state.js';
 import { resizeCanvas, centerMap, draw, loadMap, updateCursor } from './canvas.js';
-import { socket } from './socketHandlers.js';
+import { socket, requestColorChange } from './socketHandlers.js';
 
 function handleMouseDown(e) {
   const rect = state.canvas.getBoundingClientRect();
@@ -300,17 +300,7 @@ export function setupEvents() {
   document.querySelectorAll('.color-swatch').forEach(swatch => {
     swatch.addEventListener('click', () => {
       const color = swatch.dataset.color;
-      const alreadySelected = swatch.classList.contains('active');
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-      if (!alreadySelected) {
-        swatch.classList.add('active');
-        state.currentColor = color;
-      } else {
-        const redSwatch = document.querySelector('[data-color="#ff0000"]');
-        redSwatch.classList.add('active');
-        state.currentColor = '#ff0000';
-      }
-      updateCursor();
+      requestColorChange(color);
     });
   });
 
