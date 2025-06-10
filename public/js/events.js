@@ -10,6 +10,10 @@ function updateDeleteButtonVisibility() {
 }
 
 function handlePointerDown(e) {
+  if (state.draggedSymbol) {
+    // When an object icon is selected, ignore tool interactions
+    return;
+  }
   const rect = state.canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left - state.offsetX) / state.scale;
   const y = (e.clientY - rect.top - state.offsetY) / state.scale;
@@ -79,6 +83,9 @@ function handlePointerDown(e) {
 
 function handlePointerUp(e) {
   state.activePointers.delete(e.pointerId);
+  if (state.draggedSymbol) {
+    return;
+  }
 
   if (state.isPinching) {
     if (state.activePointers.size < 2) {
@@ -126,6 +133,9 @@ function handlePointerUp(e) {
 }
 
 function handlePointerMove(e) {
+  if (state.draggedSymbol) {
+    return;
+  }
   const rect = state.canvas.getBoundingClientRect();
 
   if (state.isPinching && state.activePointers.has(e.pointerId)) {
@@ -388,10 +398,19 @@ export function setupEvents() {
       state.draggedSymbol = button.dataset.symbol;
       updateCursor();
     });
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      state.draggedSymbol = button.dataset.symbol;
+      updateCursor();
+    });
   });
 
-  document.addEventListener('pointerup', () => {
-    if (state.draggedSymbol) {
+  document.addEventListener('pointerup', (e) => {
+    if (
+      state.draggedSymbol &&
+      e.target !== state.canvas &&
+      !e.target.classList.contains('draggable-button')
+    ) {
       state.draggedSymbol = null;
       updateCursor();
     }

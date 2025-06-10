@@ -113,6 +113,7 @@ button.tool-button.active {
   border: 1px solid #aaa;
   border-radius: 4px;
   cursor: grab;
+  touch-action: none;
 }
 .draggable-button:active {
   cursor: grabbing;
