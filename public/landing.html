@@ -25,6 +25,10 @@
     </div>
   </div>
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('invalidRoom') === '1') {
+      alert('Invalid room code');
+    }
     const nameInput = document.getElementById('name');
     function getName() {
       return nameInput.value.trim();

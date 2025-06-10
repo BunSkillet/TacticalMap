@@ -102,4 +102,9 @@ export function initSocket() {
   socket.on('userDisconnected', (u) => {
     if (u && u.name) console.log(`${u.name} left`);
   });
+
+  socket.on('invalidRoom', () => {
+    alert('Invalid room code');
+    window.location.href = '/?invalidRoom=1';
+  });
 }
