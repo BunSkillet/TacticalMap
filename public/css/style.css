@@ -58,6 +58,12 @@ html, body {
   cursor: pointer;
 }
 
+#room-info {
+  font-weight: bold;
+  margin-top: 35px;
+  margin-bottom: 10px;
+}
+
 #side-panel.collapsed label,
 #side-panel.collapsed select,
 #side-panel.collapsed h3,
