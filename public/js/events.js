@@ -616,14 +616,10 @@ export function setupEvents() {
 
   const helpButton = document.getElementById('help-button');
   const helpModal = document.getElementById('help-modal');
-  const closeHelp = document.getElementById('close-help');
 
-  if (helpButton && helpModal && closeHelp) {
+  if (helpButton && helpModal) {
     helpButton.addEventListener('click', () => {
       helpModal.style.display = 'flex';
-    });
-    closeHelp.addEventListener('click', () => {
-      helpModal.style.display = 'none';
     });
     helpModal.addEventListener('click', (e) => {
       if (e.target === helpModal) helpModal.style.display = 'none';
